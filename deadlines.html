@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Submit a deadline · CortexGrip</title>
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem("cortexGripTheme")||((window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light")}catch(e){}</script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    :root{--bg:#F9F8F7;--card:#fff;--muted:#F3F0EE;--border:#E8E3DF;--input:#DBD4CE;--text:#1C1917;--sub:#79706B;--primary:#F24E29;--primary-hover:#D94320;--danger:#C2261B;--shadow:0 4px 18px rgba(28,25,23,.08);color-scheme:light}
+    [data-theme="dark"]{--bg:#11100F;--card:#1C1A18;--muted:#282522;--border:#3A3632;--input:#4B4540;--text:#F5F2EF;--sub:#AAA19A;--primary:#FF6A45;--primary-hover:#F24E29;--danger:#FB7185;--shadow:0 5px 22px rgba(0,0,0,.42);color-scheme:dark}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:var(--bg);transition:background .18s,color .18s}
+    .page{width:min(680px,calc(100% - 28px));margin:0 auto;padding:28px 0 48px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:11px}.mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,var(--primary),#FF936F);box-shadow:0 5px 14px rgba(242,78,41,.22)}
+    h1{font-size:24px;line-height:1.2;margin:0}.eyebrow{color:var(--sub);font-size:13px;margin-top:4px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:15px;box-shadow:var(--shadow);padding:22px}
+    .intro{margin:0 0 20px;color:var(--sub);line-height:1.6}.field{display:grid;gap:7px;margin-top:16px}.field:first-of-type{margin-top:0}label{font-size:13px;font-weight:600}
+    input,select,textarea,button{font:inherit}input,select,textarea{width:100%;border:1px solid var(--input);border-radius:9px;background:var(--card);color:var(--text);padding:10px 11px;outline:none}input,select{height:42px}textarea{min-height:130px;resize:vertical;line-height:1.55}
+    input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(242,78,41,.18)}
+    button{height:40px;padding:0 15px;border:1px solid var(--input);border-radius:9px;background:var(--card);color:var(--text);cursor:pointer;font-weight:600}button:hover{background:var(--muted)}button.primary{width:100%;margin-top:20px;background:var(--primary);border-color:var(--primary);color:#fff}button.primary:hover{background:var(--primary-hover)}button:disabled{opacity:.6;cursor:not-allowed}
+    .status{display:none;margin-top:16px;padding:12px 13px;border-radius:9px;background:var(--muted);font-size:13px}.status.show{display:block}.status.error{color:var(--danger)}
+    .privacy{margin:16px 2px 0;color:var(--sub);font-size:12.5px;line-height:1.5}.hp{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+    @media(max-width:520px){.page{padding-top:16px}.top{align-items:flex-start}.card{padding:17px}h1{font-size:21px}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="top">
+      <div class="brand"><span class="mark" aria-hidden="true"></span><div><h1>Submit a deadline</h1><div class="eyebrow">CortexGrip deadline updates</div></div></div>
+      <button id="themeToggle" type="button">Dark mode</button>
+    </div>
+    <section class="card">
+      <p class="intro">Fred and Ayan can use this page to send a deadline update. Showmita will see it in the tracker and receive an email notification.</p>
+      <form id="deadlineForm">
+        <div class="field"><label for="submittedBy">Who is submitting?</label><select id="submittedBy" name="submittedBy" required><option value="">Select your name</option><option value="Fred">Fred</option><option value="Ayan">Ayan</option></select></div>
+        <div class="field"><label for="title">Title</label><input id="title" name="title" maxlength="140" required placeholder="What is this deadline for?"></div>
+        <div class="field"><label for="description">Brief description</label><textarea id="description" name="description" maxlength="1200" required placeholder="Add the context Showmita needs..."></textarea></div>
+        <div class="field"><label for="deadline">Deadline</label><input id="deadline" name="deadline" type="date" required></div>
+        <div class="hp" aria-hidden="true"><label for="company">Company</label><input id="company" name="company" tabindex="-1" autocomplete="off"></div>
+        <button id="submitButton" class="primary" type="submit">Submit deadline update</button>
+        <div id="formStatus" class="status" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+    <p class="privacy">Only submit work-related deadline information. The submission time is recorded automatically.</p>
+  </main>
+  <script>
+    (function(){
+      "use strict";
+      const root=document.documentElement,themeButton=document.getElementById("themeToggle"),form=document.getElementById("deadlineForm"),status=document.getElementById("formStatus"),submitButton=document.getElementById("submitButton");
+      function theme(){return root.dataset.theme==="dark"?"dark":"light"}
+      function updateThemeButton(){themeButton.textContent=theme()==="dark"?"Light mode":"Dark mode"}
+      themeButton.onclick=function(){const next=theme()==="dark"?"light":"dark";root.dataset.theme=next;try{localStorage.setItem("cortexGripTheme",next)}catch(e){}updateThemeButton()};updateThemeButton();
+      form.addEventListener("submit",async function(event){
+        event.preventDefault();status.className="status";status.textContent="";
+        const values=Object.fromEntries(new FormData(form).entries());
+        submitButton.disabled=true;submitButton.textContent="Submitting...";
+        try{
+          const response=await fetch("/api/deadlines",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(values)});
+          const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||"Unable to submit the deadline update.");
+          status.className="status show";status.textContent="Deadline submitted. It is now visible in the tracker.";form.reset();
+        }catch(error){status.className="status show error";status.textContent=error.message||"Unable to submit. Please try again."}
+        finally{submitButton.disabled=false;submitButton.textContent="Submit deadline update"}
+      });
+    })();
+  </script>
+</body>
+</html>
