@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CortexGrip Product / Process Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ================================================================
+   CortexGrip tracker — v3
+   Design system replicated from shadcn/ui conventions in plain CSS:
+   warm-stone neutrals, 36px controls, 8/12px radii, ring focus,
+   muted table headers. Brand orange (#F24E29) as primary.
+   ================================================================ */
+:root{
+  /* neutrals (warm stone) */
+  --background:#F9F8F7;
+  --card:#FFFFFF;
+  --muted:#F3F0EE;
+  --muted-50:#F8F6F4;
+  --border:#E8E3DF;
+  --input:#DBD4CE;
+  --foreground:#1C1917;
+  --secondary-foreground:#44403C;
+  --muted-foreground:#79706B;
+  /* brand */
+  --primary:#F24E29;
+  --primary-hover:#D94320;
+  --primary-foreground:#FFFFFF;
+  --ring:rgba(242,78,41,.28);
+  --primary-wash:rgba(242,78,41,.08);
+  /* semantics */
+  --info:#2B63C4;
+  --info-wash:rgba(43,99,196,.08);
+  --good:#15803D;
+  --warn:#B45309;
+  --bad:#C2261B;
+  /* shape */
+  --radius-card:12px;
+  --radius-ctl:8px;
+  --shadow-xs:0 1px 2px rgba(28,25,23,.05);
+  --shadow-sm:0 1px 3px rgba(28,25,23,.07),0 1px 2px rgba(28,25,23,.05);
+  --shadow-md:0 4px 12px -4px rgba(28,25,23,.12);
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --chevron:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'><path d='M1 1.2 5 5.2 9 1.2' fill='none' stroke='%2379706B' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:var(--font);font-size:14px;line-height:1.5;
+  color:var(--foreground);background:var(--background);
+  -webkit-font-smoothing:antialiased;accent-color:var(--primary);
+}
+button,input,select,textarea{font:inherit}
+::selection{background:rgba(242,78,41,.16)}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
+.wrap{max-width:1950px;margin:auto;padding:20px 20px 44px}
+
+/* ---------------- masthead ---------------- */
+header{
+  display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;
+  padding:14px 18px;border:1px solid var(--border);border-radius:var(--radius-card);
+  background:var(--card);box-shadow:var(--shadow-xs);
+}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.logo{
+  width:168px;height:36px;flex:none;border-radius:0;background:none;position:static;
+  background-image:url("data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIwIDQxMi42MyI+IDxkZWZzPiA8c3R5bGU+IC5jbHMtMSB7IGZpbGw6ICMwYzA0MDM7IH0gLmNscy0yIHsgZmlsbDogI2YyNGUyOTsgfSA8L3N0eWxlPiA8L2RlZnM+IDxnPiA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xOTYuODQsMjQ5LjkxYy04LjU5LDMzLjUzLTM3LjY1LDYzLjUxLTkxLjY5LDYzLjUxLTY2LjQ5LDAtOTcuODItNDQuMDUtOTcuODItOTYuMzhzMzUuNDYtOTcuMDcsOTguMjItOTcuMDcsODcuMDcsNDEuMjYsOTAuNjUsNjQuNjNoLTQwLjE3Yy01LjY0LTE1LjM0LTE4LjY4LTMyLjk3LTUwLjczLTMyLjk3LTM2LjUxLDAtNTYuODksMjcuMTctNTYuODksNjQuODZzMTkuNDcsNjUuMTIsNTYuOTMsNjUuMTJjMjcuNTMsMCw0Mi41Ny0xMi4xOSw1MS4zNi0zMS42OWg0MC4xN1oiLz4gPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNDIwLjE0LDIxNi42MWMwLDUyLjI3LTM0LjQxLDk2LjgxLTEwMC44LDk2Ljgxcy05OC4yNS00NS44OC05OC4yNS05Ni42MSwzNi41Ny05Ni44NCwxMDAuMTgtOTYuODQsOTguODcsNDguOSw5OC44Nyw5Ni42NFpNMjYyLjE1LDIxNi44YzAsMzMuMjYsMjAuNjgsNjQuNiw1OC41Nyw2NC42czU4LjA0LTI5LjU2LDU4LjA0LTY0LjEtMjAuMTItNjUuMzItNTguOC02NS4zMi01Ny44MSwzMC4xMi01Ny44MSw2NC44MloiLz4gPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNDU4LjMzLDE3NC44NmMwLTE2LjU1LDAtMzMuMy0uMzYtNDkuODVoMzkuMTNjLjY5LDUuNjcsMS40MSwyNS4yLDEuNDEsNDAuMTUsMTEuNDctMjcuMTQsMzctNDUuNTIsNzMuMzQtNDUuMDN2MzcuNzhjLTQxLjk4LS41Mi03My4zNCwyMi42OC03My4zNCw3Ni4yNnY3NC4yaC00MC4xOHYtMTMzLjUxWiIvPiA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik01OTAuODIsMTI1LjAxaDM1LjU2di01Ny44MWg0MC4zNHY1Ny44MWg0Ni41djMwLjhoLTQ2LjV2OTQuNzVjMCwxOS43LDQuODUsMjguNTEsMjQuMjgsMjguNTEsNS4yNCwwLDEyLjIyLS4yLDE3LjQ3LTEuNDd2MjguODdjLTguNjgsMi44OC0xOS4xNywzLjU0LTMwLjQ0LDMuNTQtMzkuNzIsMC01MS42NS0xNy42LTUxLjY1LTUzLjYxdi0xMDAuNThoLTM1LjU2di0zMC44WiIvPiA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik03NjkuOTUsMjI2LjE4YzEuODQsMzIuMDIsMjMuNyw1NS43NSw1OC41LDU1Ljc1LDI3LDAsNDEuNDktMTAuNDksNTAuNTctMjYuNjhoNDAuMTdjLTEwLjE2LDI4LjU0LTM2LjQ3LDU4LjE3LTkyLjI4LDU4LjE3LTY3Ljk3LDAtOTcuMTctNDguNDQtOTcuMTctOTYuMjUsMC01NC40NywzNi4zNC05Ny4yLDk2LjQxLTk3LjIsNzAuMDMsMCw5NS41OSw1MC41Myw5NS41OSw5NS45OSwwLDMuNDcsMCw2LjEtLjE2LDEwLjIyaC0xNTEuNjRaTTg4MC4yNiwxOTkuMDFjLTEuNDctMTkuODktMTIuMDYtNDguODctNTQuMzEtNDguODctMzUuODUsMC01Mi40NywyMS43OS01NS4yOSw0OC44N2gxMDkuNTlaIi8+IDwvZz4gPGc+IDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTEyMDMuOTYsNTguOThoLTczLjJjLTQuMTUsMC04LjA2LDEuOTEtMTAuNiw1LjE5bC0xNzYuMTUsMjI2LjU4Yy02Ljg2LDguODItLjU3LDIxLjY3LDEwLjYsMjEuNjdoNzMuMmM0LjE1LDAsOC4wNi0xLjkxLDEwLjYtNS4xOWwxNzYuMTUtMjI2LjU4YzYuODYtOC44Mi41Ny0yMS42Ny0xMC42LTIxLjY3WiIvPiA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xMDA3LjE3LDE1NS41MWMtMy4wMiwwLTYuMDEtMS4zNS04LjAxLTMuOTJsLTU1LjE1LTcwLjkzYy02Ljg2LTguODMtLjU3LTIxLjY4LDEwLjYxLTIxLjY4aDc3LjQ1YzUuNDksMCwxMC40MSw0LjExLDEwLjcsOS41OS4zMSw1Ljg1LTQuMzQsMTAuNjgtMTAuMTIsMTAuNjhoLTY0LjA1bDQ2LjI0LDU5LjQ3YzMuNDYsNC40NSwzLjA2LDExLjA2LTEuMzUsMTQuNTctMS44NywxLjQ5LTQuMSwyLjIxLTYuMzEsMi4yMVoiLz4gPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTE1MS40MSwyMTUuODhjMy4wMiwwLDYuMDEsMS4zNSw4LjAxLDMuOTJsNTUuMTUsNzAuOTNjNi44Niw4LjgzLjU3LDIxLjY4LTEwLjYxLDIxLjY4aC03Ny40NWMtNS40OSwwLTEwLjQxLTQuMTEtMTAuNy05LjU5LS4zMS01Ljg1LDQuMzQtMTAuNjgsMTAuMTItMTAuNjhoNjQuMDVsLTQ2LjI0LTU5LjQ3Yy0zLjQ2LTQuNDUtMy4wNi0xMS4wNiwxLjM1LTE0LjU3LDEuODctMS40OSw0LjEtMi4yMSw2LjMxLTIuMjFaIi8+IDwvZz4gPGc+IDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE0MzEuNDIsMjg2LjU2YzAsNjguMjYtMjQuMzIsMTA3Ljc5LTEwMC40NCwxMDcuNzlzLTg4Ljg4LTQyLjM0LTkyLjMyLTYzLjUxaDQwLjljNS4xNSwxNi45NCwxNy42NiwzMi4xOCw1My42NSwzMi4xOCw0OS43MiwwLDU4LjU2LTMxLjk5LDU4LjU2LTczLjk3di05LjM3Yy0xMS4wMSwxOS43OS0yOS41OSwzMi45Ny02Ny4wNSwzMi45Ny01Mi4wNywwLTg3Ljg5LTQwLjkzLTg3Ljg5LTkyLjM4LDAtNTguMjcsNDIuMjQtOTguOTcsOTIuMzgtOTguOTcsNDEuMTMsMCw1Ny4yNSwxOC4xMiw2Mi41NiwzMS40LjE2LTguMjkuNTItMjEuNDMsMS4wOC0yNi4zNWgzOC45M2MtLjM2LDE3Ljc5LS4zNiwzNS41OS0uMzYsNTMuMzh2MTA2Ljg0Wk0xMjc4LjA1LDIxOC42OWMwLDM0Ljk0LDIyLjUyLDYxLjIyLDU3LjAzLDYxLjIyczU3LjU4LTIyLjI5LDU3LjU4LTYzLjIyLTIwLjE1LTYyLjUzLTU1Ljc1LTYyLjUzYy0zOS42OSwwLTU4Ljg2LDMxLjM2LTU4Ljg2LDY0LjUzWiIvPiA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xNDgzLjk5LDE3Ni4xOWMwLTE2LjU1LDAtMzMuMy0uMzYtNDkuODVoMzkuMTNjLjY5LDUuNjcsMS40MSwyNS4yLDEuNDEsNDAuMTUsMTEuNDctMjcuMTQsMzctNDUuNTIsNzMuMzQtNDUuMDN2MzcuNzhjLTQxLjk4LS41Mi03My4zNCwyMi42OC03My4zNCw3Ni4yNnY3NC4yaC00MC4xOHYtMTMzLjUxWiIvPiA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xNjI2Ljc1LDM5LjNoNDAuMTh2NDIuNmgtNDAuMTh2LTQyLjZaTTE2MjYuNzUsMTI2LjM0aDQwLjE4djE4My4zNmgtNDAuMThWMTI2LjM0WiIvPiA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xNzU4LjEyLDI4NC44M3YxMDQuNDhoLTQwLjE4di0yMTcuMzhjMC0xNS4xNCwwLTMwLjQ1LS4zNi00NS41OWgzOS4yOWMuNzIsNC44MiwxLjI0LDE3LjI0LDEuMjQsMjkuNjMsMTAuNjUtMTguMTYsMzEuNC0zNC42Nyw2OC45Mi0zNC42Nyw0OC45MywwLDg1LjYsNDAuMjEsODUuNiw5My40MywwLDYwLjg2LTQyLjQ3LDEwMC4wMi05MS43NiwxMDAuMDItMzYuMDgsMC01My4xMi0xNS4zNC02Mi43Ni0yOS45MlpNMTg3MS4yNiwyMTYuNTZjMC0zMS4yMy0xNy45My02Mi40LTU2LjQ3LTYyLjQtNDAuNTEsMC01Ny43MSwyOC4wNS01Ny43MSw2NC41M3MxOS4wNyw2Mi44Niw1Ni45OSw2Mi44Niw1Ny4xOS0yOS43Niw1Ny4xOS02NC45OVoiLz4gPC9nPiA8L3N2Zz4=");
+  background-repeat:no-repeat;background-position:left center;background-size:contain;
+}
+.logo:before,.logo:after{content:none}
+.brand-name{display:none}                 /* wordmark lives in the lockup */
+.sub{color:var(--muted-foreground);font-size:13px;margin:0;max-width:56ch}
+
+/* ---------------- buttons ---------------- */
+.export-grid{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.row,.product-list,.diagram-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.product-list{margin-top:12px}
+button{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  height:36px;padding:0 14px;border:1px solid var(--input);border-radius:var(--radius-ctl);
+  background:var(--card);color:var(--secondary-foreground);
+  font-size:13px;font-weight:500;line-height:1;cursor:pointer;white-space:nowrap;
+  box-shadow:var(--shadow-xs);
+  transition:background .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;
+}
+button:hover{background:var(--muted-50);color:var(--foreground)}
+button:active{box-shadow:none}
+button.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-foreground);font-weight:600}
+button.primary:hover{background:var(--primary-hover);border-color:var(--primary-hover);color:#fff}
+button.danger{color:var(--bad);border-color:#EED4CE}
+button.danger:hover{background:#FCF0ED;border-color:#E0A79B;color:var(--bad)}
+.sync.pending{background:#FEF3C7;color:#92400E;border-color:#FDE68A}
+.sync.pending:hover{background:#FDE68A;color:#78350F;border-color:#FCD34D}
+
+/* ---------------- form controls ---------------- */
+input,textarea{
+  min-height:36px;background:var(--card);color:var(--foreground);
+  border:1px solid var(--input);border-radius:var(--radius-ctl);
+  padding:7px 11px;font-size:13.5px;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+select{
+  height:36px;-webkit-appearance:none;appearance:none;cursor:pointer;
+  background-color:var(--card);background-image:var(--chevron);
+  background-repeat:no-repeat;background-position:right 11px center;
+  color:var(--foreground);border:1px solid var(--input);border-radius:var(--radius-ctl);
+  padding:0 32px 0 11px;font-size:13.5px;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+textarea{line-height:1.45}
+input::placeholder,textarea::placeholder{color:#A89E97}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--ring)}
+input[type=date]{font-variant-numeric:tabular-nums}
+input[type=checkbox]{min-height:0}
+
+/* ---------------- tabs (shadcn segmented) ---------------- */
+.tabs{display:inline-flex;gap:2px;flex-wrap:wrap;align-items:center;margin-top:16px;padding:4px;background:var(--muted);border:1px solid var(--border);border-radius:calc(var(--radius-ctl) + 4px)}
+.tab{height:32px;padding:0 16px;background:transparent;border-color:transparent;box-shadow:none;color:var(--muted-foreground);font-weight:500}
+.tab:hover{background:rgba(255,255,255,.6);color:var(--foreground)}
+.tab.active{background:var(--card);color:var(--primary);font-weight:600;box-shadow:var(--shadow-xs);border-color:var(--border)}
+.tab.active:hover{background:var(--card);color:var(--primary)}
+.view{display:none}
+.view.active{display:block}
+
+/* ---------------- cards / panels ---------------- */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-card);padding:16px;margin-top:14px;box-shadow:var(--shadow-xs)}
+.panel>strong,.diagram-toolbar strong{font-size:15px;font-weight:600;letter-spacing:-.006em}
+.note{color:var(--muted-foreground);font-size:13px;margin-top:4px;max-width:92ch}
+.sync-state{color:var(--muted-foreground);font-size:12.5px}
+
+.product-chip{display:inline-flex;align-items:center;gap:2px;background:var(--card);border:1px solid var(--border);border-radius:999px;padding:3px 5px 3px 12px;box-shadow:var(--shadow-xs);max-width:100%}
+.product-chip input{min-height:0;width:auto;field-sizing:content;min-width:60px;max-width:230px;background:transparent;border:0;padding:3px 2px;font-weight:500;font-size:13px;box-shadow:none}
+.product-chip input:focus{outline:none;box-shadow:none;border-bottom:1px solid var(--primary);border-radius:0}
+.product-chip button{height:24px;width:24px;padding:0;border-radius:999px;font-size:14px;color:var(--muted-foreground);border-color:transparent;background:transparent;box-shadow:none}
+.product-chip button:hover{background:var(--muted);color:var(--bad)}
+#newProduct{max-width:460px}
+
+/* ---------------- stats ---------------- */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px;margin-top:14px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-card);padding:14px 16px;box-shadow:var(--shadow-xs)}
+.stat small{color:var(--muted-foreground);font-size:12.5px;font-weight:500}
+.stat b{display:block;font-size:26px;font-weight:650;margin-top:2px;letter-spacing:-.02em;line-height:1.2;font-variant-numeric:tabular-nums}
+
+/* ---------------- status system ---------------- */
+.status-legend{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.legend-item{display:inline-flex;align-items:center;gap:7px;padding:4px 11px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12.5px;font-weight:500;color:var(--secondary-foreground)}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.status-badge,.status-pill{display:inline-block;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600;border:1px solid var(--border);background-color:var(--muted);color:var(--secondary-foreground);white-space:nowrap}
+.status-select{font-weight:500}
+.status-planning{color:#5B21B6!important;background-color:rgba(109,40,217,.08)!important;border-color:rgba(109,40,217,.25)!important}
+.status-not-started{color:#57534E!important;background-color:rgba(120,113,108,.09)!important;border-color:rgba(120,113,108,.25)!important}
+.status-in-progress{color:#1D4ED8!important;background-color:rgba(37,99,235,.08)!important;border-color:rgba(37,99,235,.25)!important}
+.status-blocked{color:#A61B12!important;background-color:rgba(194,38,27,.09)!important;border-color:rgba(194,38,27,.28)!important}
+.status-on-hold{color:#9A4507!important;background-color:rgba(180,83,9,.10)!important;border-color:rgba(180,83,9,.26)!important}
+.status-complete{color:#136E37!important;background-color:rgba(21,128,61,.09)!important;border-color:rgba(21,128,61,.25)!important}
+.status-post-completion-process{color:#0E6F68!important;background-color:rgba(15,118,110,.09)!important;border-color:rgba(15,118,110,.25)!important}
+.legend-planning{background:#6D28D9}.legend-not-started{background:#78716C}.legend-in-progress{background:#2563EB}
+.legend-blocked{background:#C2261B}.legend-on-hold{background:#B45309}.legend-complete{background:#15803D}
+.legend-post-completion-process{background:#0F766E}
+
+/* ---------------- task table ---------------- */
+.table-wrap{overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-card);margin-top:14px;box-shadow:var(--shadow-xs)}
+table{width:100%;border-collapse:collapse;min-width:1580px}
+th,td{padding:8px;border-bottom:1px solid var(--border);vertical-align:top}
+th{
+  background:var(--muted-50);position:sticky;top:0;z-index:2;text-align:left;
+  height:40px;font-size:12.5px;font-weight:550;color:var(--muted-foreground);
+  white-space:nowrap;padding:0 8px;vertical-align:middle;
+}
+tbody tr:hover>td{background:var(--muted-50)}
+td input,td select,td textarea{width:100%;background-color:transparent;border-color:transparent;box-shadow:none;padding:6px 8px;min-height:32px}
+td select{height:32px;padding:0 26px 0 8px;background-position:right 8px center;font-size:13px}
+td input:hover,td select:hover,td textarea:hover{border-color:var(--input);background-color:var(--card)}
+td input:focus,td select:focus,td textarea:focus{background-color:var(--card);border-color:var(--primary);box-shadow:0 0 0 3px var(--ring)}
+td input[type=date]{border-color:var(--border);background-color:var(--card);font-size:12.5px;min-height:32px;padding:4px 8px}
+td input[type=checkbox]{width:16px;height:16px;margin-top:8px;cursor:pointer}
+td textarea{min-height:46px;resize:vertical;font-size:13px}
+td:first-child,th:first-child{padding-left:14px}
+td:last-child,th:last-child{padding-right:14px}
+
+.deadline-edit{display:grid;gap:4px;min-width:148px}
+.deadline-edit select{height:28px;font-size:12px;font-weight:500;padding:0 24px 0 8px;color:var(--muted-foreground)}
+.deadline-edit select:focus{color:var(--foreground)}
+.deadline-toggle{display:flex;align-items:center;gap:6px;color:var(--muted-foreground);font-size:11px;white-space:nowrap}
+.deadline-toggle input{width:auto}
+.deadline{font-size:12.5px;font-weight:550;color:var(--muted-foreground)}
+.deadline.overdue{color:var(--bad);font-weight:650}
+.deadline.soon{color:var(--warn);font-weight:650}
+.deadline.ok{color:var(--good);font-weight:650}
+.deadline.ongoing{color:#0F766E;font-weight:650}
+.deadline.done{color:var(--muted-foreground);text-decoration:line-through;font-weight:450}
+
+.subtask-btn{height:30px;padding:0 11px;font-size:12.5px;white-space:nowrap}
+.subtask-count{display:inline-block;min-width:20px;padding:1px 6px;border-radius:999px;background:var(--primary-wash);color:var(--primary-hover);font-size:11px;font-weight:600;text-align:center}
+.subtask-row td{background:var(--muted-50);padding:0 14px}
+.subtask-panel{display:none}
+.subtask-panel.open{display:block;padding:14px 2px 16px}
+.subtask-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.subtask-head strong{font-size:13.5px;font-weight:600}
+.subtask-grid{display:grid;gap:8px}
+.subtask-item{display:grid;grid-template-columns:minmax(180px,2fr) minmax(150px,1fr) minmax(145px,1fr) minmax(220px,2fr) auto;gap:8px;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-ctl);padding:8px;box-shadow:var(--shadow-xs)}
+.subtask-item textarea{min-height:38px;resize:vertical}
+.subtask-item input,.subtask-item textarea{background-color:transparent;border-color:transparent;min-height:32px}
+.subtask-item input:hover,.subtask-item textarea:hover{border-color:var(--input);background-color:var(--card)}
+.subtask-item input:focus,.subtask-item textarea:focus{background-color:var(--card);border-color:var(--primary)}
+.subtask-empty{color:var(--muted-foreground);font-size:13px;padding:8px 2px}
+
+/* ---------------- product / process board ---------------- */
+.diagram-toolbar{justify-content:space-between}
+.diagram-hint{color:var(--muted-foreground);font-size:12px}
+.board-wrap{width:100%;overflow-x:auto;padding:4px 4px 16px;margin-top:16px}
+.board-wrap::-webkit-scrollbar{height:10px}
+.board-wrap::-webkit-scrollbar-track{background:var(--muted);border-radius:999px}
+.board-wrap::-webkit-scrollbar-thumb{background:#D6CCC4;border-radius:999px}
+.board-wrap::-webkit-scrollbar-thumb:hover{background:var(--primary)}
+.products-board{display:grid;gap:18px;align-items:start}
+.product-column{text-align:center;min-width:0}
+.product-column.dragging{opacity:.4}
+.product-pill{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;min-height:56px;
+  padding:12px 14px;border-radius:var(--radius-card);color:#fff;cursor:grab;
+  font-size:15.5px;font-weight:600;letter-spacing:-.006em;line-height:1.25;
+  background:var(--primary);box-shadow:var(--shadow-sm);
+}
+.product-pill:active{cursor:grabbing}
+.product-pill>span:first-child{grid-column:2;text-align:center;justify-self:center}
+.product-pill .reorder{grid-column:3;justify-self:end;display:flex;gap:4px}
+.product-pill .reorder button{height:24px;padding:0 8px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font-size:11px;box-shadow:none}
+.product-pill .reorder button:hover{background:rgba(255,255,255,.26);border-color:#fff;color:#fff}
+.product-pill .reorder button:disabled{opacity:.35;cursor:not-allowed}
+.product-line{width:2px;height:24px;margin:0 auto;background:var(--border);border-radius:999px}
+.owner-list{display:grid;gap:18px}
+.owner-branch{display:grid;justify-items:center}
+.owner-box{display:inline-block;min-width:190px;max-width:95%;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-ctl);box-shadow:var(--shadow-xs);text-align:left}
+.owner-box strong{font-size:13.5px;font-weight:600}
+.owner-label,.label{display:block;color:var(--muted-foreground);font-size:11px;font-weight:500;margin-bottom:2px}
+.owner-line{width:2px;height:18px;margin:0 auto;background:var(--border);border-radius:999px}
+.task-list{display:grid;gap:10px;width:100%}
+.task-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden;text-align:left;box-shadow:var(--shadow-xs);transition:box-shadow .15s ease,border-color .15s ease}
+.task-card:hover{box-shadow:var(--shadow-md);border-color:var(--input)}
+.task-card-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;padding:10px 12px;background:var(--muted-50);border-bottom:1px solid var(--border)}
+.task-title{font-size:13.5px;font-weight:600;line-height:1.35;margin-bottom:6px;color:var(--foreground)}
+.task-info{padding:11px 12px}
+.deadline-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.deadline-box{padding:8px 9px;border:1px solid var(--border);border-radius:var(--radius-ctl);background:var(--muted-50)}
+.comment-box{border-top:1px solid var(--border);padding-top:9px;margin-top:9px}
+.value{font-size:12.5px;line-height:1.5;color:var(--secondary-foreground)}
+.subtasks-mini{margin-top:9px;padding-top:8px;border-top:1px dashed var(--border);font-size:11.5px;color:var(--muted-foreground)}
+.subtasks-mini div{margin-top:4px;line-height:1.45}
+.subtasks-mini b{color:var(--foreground);font-weight:550}
+.task-card[draggable="true"]{cursor:grab}
+.task-card.task-dragging{opacity:.4}
+.task-head-main{min-width:0;flex:1}
+.task-reorder{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.task-reorder button{height:22px;padding:0 7px;font-size:11px;color:var(--muted-foreground);box-shadow:none}
+.task-reorder button:disabled{opacity:.35;cursor:not-allowed}
+
+/* ---------------- calendar ---------------- */
+.cal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:16px 0 10px}
+.cal-head h2{font-size:19px;font-weight:650;letter-spacing:-.014em}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden;box-shadow:var(--shadow-xs)}
+.weekday,.day{background:var(--card);padding:9px;min-height:110px}
+.weekday{min-height:auto;text-align:center;font-size:12px;color:var(--muted-foreground);font-weight:550;background:var(--muted-50);padding:9px 8px}
+.day.muted{background:var(--muted-50)}
+.day.muted .date-num{color:#BBB0A8}
+.date-num{font-weight:600;font-size:12.5px;margin-bottom:6px;color:var(--secondary-foreground);font-variant-numeric:tabular-nums}
+.event{background:var(--info-wash);border-left:3px solid var(--info);border-radius:6px;padding:5px 8px;margin-top:4px;font-size:11px;line-height:1.35;text-align:left}
+.event.update{background:var(--info-wash);border-left-color:var(--info)}
+.event.finish{background:var(--primary-wash);border-left-color:var(--primary)}
+.event b{display:block;font-weight:600;color:var(--foreground);margin-bottom:1px}
+.event span{color:var(--muted-foreground)}
+
+/* ---------------- read-only exports ---------------- */
+.readonly-wrap{max-width:1950px;margin:auto;padding:22px 20px 40px}
+.readonly-wrap .brand{margin-bottom:6px}
+.readonly-section{margin-top:26px}
+.readonly-section h2{font-size:18px;font-weight:650;letter-spacing:-.012em;margin:0 0 8px}
+.readonly-table{width:100%;border-collapse:collapse;min-width:1050px}
+.readonly-table th,.readonly-table td{padding:9px;border-bottom:1px solid var(--border);vertical-align:top;text-align:left;font-size:13px}
+.readonly-table th{background:var(--muted-50);font-size:12.5px;font-weight:550;color:var(--muted-foreground)}
+.readonly-subtasks{font-size:11.5px;color:var(--muted-foreground);margin-top:5px;line-height:1.5}
+.readonly-subtasks b{color:var(--secondary-foreground);font-weight:550}
+
+/* ---------------- responsive ---------------- */
+@media(max-width:1100px){
+  header{align-items:flex-start}
+  .export-grid{justify-content:flex-start}
+}
+@media(max-width:900px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .calendar{grid-template-columns:repeat(7,minmax(95px,1fr));overflow:auto}
+  .wrap,.readonly-wrap{padding:12px 12px 32px}
+  .subtask-item{grid-template-columns:1fr}
+  .deadline-pair{grid-template-columns:1fr}
+  header{padding:12px 14px}
+  .logo{width:148px;height:32px}
+}
+@media(max-width:700px){
+  body{font-size:15px}
+  input,select,textarea{font-size:16px}          /* stops iOS focus zoom */
+  .sub{display:none}
+  .export-grid{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .export-grid button{width:100%;padding:0 8px;font-size:12.5px}
+  .export-grid .sync{grid-column:1 / -1}
+  .tabs{display:flex;width:100%}
+  .tab{flex:1;padding:0 8px}
+  .row>input,.row>select{flex:1 1 100%}
+  #newProduct{max-width:none}
+  .sync-state{flex-basis:100%}
+  .stats{grid-template-columns:1fr 1fr;gap:8px}
+  .stat b{font-size:22px}
+  /* board: stack product columns vertically (overrides JS inline sizing) */
+  .products-board{grid-template-columns:1fr!important;min-width:0!important;gap:22px}
+  .board-wrap{overflow-x:visible}
+  .cal-head h2{font-size:16px}
+  .cal-head button{padding:0 10px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---------------- download menu ---------------- */
+.dl-menu{position:relative}
+.dl-menu summary{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;height:36px;padding:0 12px;
+  border:1px solid var(--input);border-radius:var(--radius-ctl);background:var(--card);
+  color:var(--secondary-foreground);cursor:pointer;box-shadow:var(--shadow-xs);list-style:none;
+  transition:background .15s ease,border-color .15s ease,color .15s ease;
+}
+.dl-menu summary::-webkit-details-marker{display:none}
+.dl-menu summary:hover{background:var(--muted-50);color:var(--foreground)}
+.dl-menu[open] summary{background:var(--muted-50);border-color:var(--primary);color:var(--foreground)}
+.dl-menu[open] .dl-caret{transform:rotate(180deg)}
+.dl-caret{transition:transform .15s ease}
+.dl-pop{
+  position:absolute;right:0;top:calc(100% + 6px);z-index:60;min-width:236px;
+  display:grid;gap:2px;padding:5px;background:var(--card);
+  border:1px solid var(--border);border-radius:calc(var(--radius-ctl) + 2px);box-shadow:var(--shadow-md);
+}
+.dl-pop button{width:100%;justify-content:flex-start;height:34px;border-color:transparent;box-shadow:none;background:transparent;font-weight:500}
+.dl-pop button:hover{background:var(--muted);border-color:transparent}
+
+/* ---------------- presentation mode ---------------- */
+#exitPresent{display:none}
+body.presenting #exitPresent{
+  display:inline-flex;position:fixed;top:14px;right:14px;z-index:100;
+  background:var(--card);opacity:.55;
+}
+body.presenting #exitPresent:hover{opacity:1}
+body.presenting .export-grid,
+body.presenting .tabs,
+body.presenting #statusLegendPanel,
+body.presenting #diagramView>.panel,
+body.presenting .product-pill .reorder,
+body.presenting .task-reorder{display:none!important}
+body.presenting{background:#FFFFFF}
+body.presenting .wrap{max-width:none;padding:14px 28px 40px}
+body.presenting header{border:0;background:transparent;box-shadow:none;padding:4px 0 0}
+body.presenting .board-wrap{margin-top:10px}
+body.presenting .product-pill,body.presenting .task-card[draggable="true"]{cursor:default}
+body.presenting .product-pill{min-height:60px;font-size:17px}
+body.presenting .task-title{font-size:14.5px}
+body.presenting .value{font-size:13px}
+body.presenting .owner-label,body.presenting .label{font-size:11.5px}
+@media(max-width:700px){
+  .export-grid .dl-menu{width:100%}
+  .dl-menu summary{width:100%}
+  .dl-pop{left:0;right:0}
+}
+@media print{.dl-pop{display:none}body.presenting #exitPresent{display:none}}
+
+/* ---------------- print / PDF ---------------- */
+@media print{
+  body{background:#fff}
+  .wrap,.readonly-wrap{padding:0;max-width:none}
+  header{box-shadow:none;border-color:var(--input)}
+  .export-grid,.tabs,.task-reorder,.product-pill .reorder,.diagram-hint,
+  .subtask-btn,button.danger,#addTask,#addProduct,#csvBtn{display:none!important}
+  .panel,.stat,.task-card,.table-wrap,.calendar{box-shadow:none}
+  .task-card,.owner-branch,.stat,tr{break-inside:avoid}
+  thead{display:table-header-group}
+  .board-wrap{overflow:visible}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+</style>
+</head>
+<body>
+<button id="exitPresent" title="Exit presentation (Esc)">Exit presentation</button>
+<script id="snapshotData" type="application/json">{"products": ["AI Website Builder", "Customer Portal", "Marketing Website", "Email", "ICANN & TLD Reg", "Digital Marketing"], "tasks": [{"id": "t_import_0", "name": "AI Website Builder Tool", "status": "In Progress", "product": "AI Website Builder", "owner": "Frederick", "nextUpdateDeadline": "", "deadline": "2026-09-21", "comment": "Holding on the team, \nWill have meeting tomorrow", "done": false, "subtasks": [{"id": "s_import_0_0", "title": "Website transfer (By code/url)", "status": "In Progress", "deadline": "", "comment": ""}, {"id": "s_import_0_1", "title": "Hidden Pages Alert", "status": "Not Started", "deadline": "", "comment": ""}, {"id": "s_import_0_2", "title": "Visual AI model", "status": "Not Started", "deadline": "", "comment": ""}, {"id": "s_import_0_3", "title": "Improvement of website outcome", "status": "Not Started", "deadline": "", "comment": ""}, {"id": "s_import_0_4", "title": "Knowledge Base and Guard creation", "status": "Not Started", "deadline": "", "comment": ""}, {"id": "s_import_0_5", "title": "Improvement of the conversation layout and the editing layout", "status": "Not Started", "deadline": "", "comment": ""}]}, {"id": "t_import_1", "name": "Customer Portal Implementation", "status": "In Progress", "product": "Customer Portal", "owner": "Frederick", "nextUpdateDeadline": "2026-09-18", "deadline": "Awaiting deadline", "comment": "Holding on the team, \nWill have meeting tomorrow", "done": false, "subtasks": [{"id": "s_import_1_0", "title": "Domain Search Engine with suggestion", "status": "Not Started", "deadline": "", "comment": ""}, {"id": "s_import_1_1", "title": "Payment Gateway Integration", "status": "Not Started", "deadline": "", "comment": ""}]}, {"id": "t_import_2", "name": "Customer Portal Design", "status": "In Progress", "product": "Customer Portal", "owner": "Frederick", "nextUpdateDeadline": "2026-09-18", "deadline": "Awaiting deadline", "comment": "Holding on the team, \nWill have meeting tomorrow", "done": false, "subtasks": []}, {"id": "t_import_3", "name": "Marketing Website Design", "status": "In Progress", "product": "Marketing Website", "owner": "Frederick", "nextUpdateDeadline": "2026-09-18", "deadline": "Awaiting deadline", "comment": "Holding on the team , will update today", "done": false, "subtasks": []}, {"id": "t_import_4", "name": "Email Service & Client", "status": "Planning", "product": "Email", "owner": "Ayan", "nextUpdateDeadline": "2026-09-27", "deadline": "Awaiting deadline", "comment": "", "done": false, "subtasks": [{"id": "s_import_4_0", "title": "Email UI Finalization", "status": "Planning", "deadline": "", "comment": ""}, {"id": "s_import_4_1", "title": "Email Service Imeplementation", "status": "Planning", "deadline": "", "comment": ""}]}, {"id": "t_import_5", "name": "ICANN Registration", "status": "Post Completion Process", "product": "ICANN & TLD Reg", "owner": "Showmita Saha", "nextUpdateDeadline": "2026-09-18", "deadline": "2026-10-01", "comment": "", "done": false, "subtasks": []}, {"id": "t_import_6", "name": "Nominate Registration", "status": "On Hold", "product": "ICANN & TLD Reg", "owner": "Showmita Saha", "nextUpdateDeadline": "Awaiting deadline", "deadline": "2026-10-12", "comment": "Nick is not available, require insurance confirmation", "done": false, "subtasks": []}, {"id": "t_import_7", "name": "Registrar solution onboarding", "status": "In Progress", "product": "ICANN & TLD Reg", "owner": "Ayan", "nextUpdateDeadline": "2026-09-18", "deadline": "2026-09-30", "comment": "Meeting on 18/09/2026", "done": false, "subtasks": []}, {"id": "t_import_8", "name": "Versign & other registry  onoboaring", "status": "Not Started", "product": "ICANN & TLD Reg", "owner": "Ayan", "nextUpdateDeadline": "2026-09-22", "deadline": "2026-10-15", "comment": "Dependent on Registrar solution & Payments", "done": false, "subtasks": []}, {"id": "t_import_9", "name": "Posting on Social Media (FB, IG, LinkedIN, Tikton )", "status": "In Progress", "product": "Digital Marketing", "owner": "Harshil", "nextUpdateDeadline": "", "deadline": "Ongoing — No Fixed End Date", "comment": "", "done": false, "subtasks": []}], "diagramTaskOrder": ["t_import_0", "t_import_1", "t_import_2", "t_import_3", "t_import_4", "t_import_5", "t_import_6", "t_import_7", "t_import_8", "t_import_9"]}</script>
+<div class="wrap">
+<header>
+<div class="brand"><span class="logo"></span><div><div class="brand-name">CortexGrip</div><div class="sub">Product / Process tracker, block diagram and deadline calendar</div></div></div>
+<div class="export-grid">
+<button id="syncViews" class="primary sync">Update Diagram &amp; Calendar</button>
+<details class="dl-menu" id="dlMenu">
+<summary title="Downloads" aria-label="Download options"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><svg class="dl-caret" width="10" height="7" viewBox="0 0 10 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 1.2 5 5.2 9 1.2"/></svg></summary>
+<div class="dl-pop">
+<button id="dlTasks">Download Task List HTML</button>
+<button id="dlDiagram">Download Diagram HTML</button>
+<button id="dlCalendar">Download Calendar HTML</button>
+<button id="dlAll">Download Combined HTML</button>
+</div>
+</details>
+</div>
+</header>
+<div class="tabs"><button class="tab active" data-view="tasksView">Task List</button><button class="tab" data-view="diagramView">Product Diagram</button><button class="tab" data-view="calendarView">Calendar</button></div>
+
+<div class="panel" id="statusLegendPanel">
+  <strong>Status colour key</strong>
+  <div class="note">These colours are used in the task list, subtasks, and Product / Process diagram.</div>
+  <div class="status-legend">
+    <span class="legend-item"><span class="legend-dot legend-planning"></span>Planning</span>
+    <span class="legend-item"><span class="legend-dot legend-not-started"></span>Not Started</span>
+    <span class="legend-item"><span class="legend-dot legend-in-progress"></span>In Progress</span>
+    <span class="legend-item"><span class="legend-dot legend-blocked"></span>Blocked</span>
+    <span class="legend-item"><span class="legend-dot legend-on-hold"></span>On Hold</span>
+    <span class="legend-item"><span class="legend-dot legend-complete"></span>Complete</span>
+    <span class="legend-item"><span class="legend-dot legend-post-completion-process"></span>Post Completion Process</span>
+  </div>
+</div>
+
+<section id="tasksView" class="view active">
+<div class="panel"><strong>Product / Process list</strong><div class="note">Click a category name to rename it. Existing tasks will update automatically.</div><div class="row" style="margin-top:10px"><input id="newProduct" placeholder="Add Product / Process..." style="min-width:260px;flex:1"><button id="addProduct" class="primary">+ Add Product / Process</button></div><div id="productList" class="product-list"><span class="product-chip"><span>Marketing Website</span><button data-del-prod="0">×</button></span><span class="product-chip"><span>Registration</span><button data-del-prod="1">×</button></span><span class="product-chip"><span>Email Client</span><button data-del-prod="2">×</button></span><span class="product-chip"><span>CRM (Customer)</span><button data-del-prod="3">×</button></span><span class="product-chip"><span>Website Builder</span><button data-del-prod="4">×</button></span></div></div>
+<div class="panel"><strong>Tasks</strong><div class="row" style="margin-top:10px"><button id="addTask" class="primary">+ Add Task</button><input id="search" placeholder="Search task, owner, comment or subtask..." style="min-width:220px;flex:1"><select id="statusFilter"><option value="">All statuses</option><option>Planning</option><option>Not Started</option><option>In Progress</option><option>Blocked</option><option>On Hold</option><option>Complete</option><option>Post Completion Process</option></select><select id="productFilter"><option value="">All Product / Process</option><option value="Marketing Website">Marketing Website</option><option value="Registration">Registration</option><option value="Email Client">Email Client</option><option value="CRM (Customer)">CRM (Customer)</option><option value="Website Builder">Website Builder</option></select><button id="csvBtn">Export CSV</button><span id="syncState" class="sync-state">Diagram &amp; calendar updated from the task list.</span></div></div>
+<div class="stats"><div class="stat"><small>Total tasks</small><b id="totalStat">9</b></div><div class="stat"><small>Completed</small><b id="doneStat">0</b></div><div class="stat"><small>Overdue</small><b id="overdueStat">0</b></div><div class="stat"><small>Progress</small><b><span id="progressStat">0</span>%</b></div></div>
+<div class="table-wrap"><table><thead><tr><th>✓</th><th>Task Name</th><th>Status</th><th>Product / Process</th><th>Responsible</th><th>Next Update Deadline</th><th>Finish Deadline / Ongoing</th><th>Finish Status</th><th>Subtasks</th><th>Comment / Update</th><th></th></tr></thead><tbody id="taskBody"><tr><td><input type="checkbox" data-id="t_mu5n85ye_q9srvh" data-field="done"></td><td><input data-id="t_mu5n85ye_q9srvh" data-field="name" value="AI Website Builder Tool "></td><td><select data-id="t_mu5n85ye_q9srvh" data-field="status"><option value="Planning">Planning</option><option value="Not Started">Not Started</option><option value="In Progress" selected="">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select></td><td><select data-id="t_mu5n85ye_q9srvh" data-field="product"><option value="Marketing Website">Marketing Website</option><option value="Registration">Registration</option><option value="Email Client">Email Client</option><option value="CRM (Customer)">CRM (Customer)</option><option value="Website Builder" selected="">Website Builder</option></select></td><td><input data-id="t_mu5n85ye_q9srvh" data-field="owner" value="Frederick"></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5n85ye_q9srvh" data-field="nextUpdateDeadline" value=""><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5n85ye_q9srvh" data-deadline-field="nextUpdateDeadline"> Awaiting deadline</label></div></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5n85ye_q9srvh" data-field="deadline" value="2026-09-21"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5n85ye_q9srvh" data-deadline-field="deadline"> Awaiting deadline</label></div></td><td><span class="deadline ok">On track</span></td><td><button class="subtask-btn" data-toggle-subtasks="t_mu5n85ye_q9srvh">Subtasks <span class="subtask-count">6</span></button></td><td><textarea data-id="t_mu5n85ye_q9srvh" data-field="comment">Holding on the team, 
+Will have meeting tomorrow</textarea></td><td><button class="danger" data-del-task="t_mu5n85ye_q9srvh">Delete</button></td></tr><tr class="subtask-row"><td colspan="11"><div class="subtask-panel "><div class="subtask-head"><strong>Subtasks for AI Website Builder Tool </strong><button data-add-subtask="t_mu5n85ye_q9srvh" class="primary">+ Add Subtask</button></div><div class="subtask-grid"><div class="subtask-item"><input data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rmwsa_s6h24x" data-subtask-field="title" value="Website transfer (By code/url)" placeholder="Subtask"><select data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rmwsa_s6h24x" data-subtask-field="status"><option value="Planning" selected="">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select><input type="date" data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rmwsa_s6h24x" data-subtask-field="deadline" value=""><textarea data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rmwsa_s6h24x" data-subtask-field="comment" placeholder="Subtask comment"></textarea><button class="danger" data-del-subtask="s_mu5rmwsa_s6h24x" data-task="t_mu5n85ye_q9srvh">Delete</button></div><div class="subtask-item"><input data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rnq2k_krcyip" data-subtask-field="title" value="Hidden Pages Alert" placeholder="Subtask"><select data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rnq2k_krcyip" data-subtask-field="status"><option value="Planning" selected="">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select><input type="date" data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rnq2k_krcyip" data-subtask-field="deadline" value=""><textarea data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rnq2k_krcyip" data-subtask-field="comment" placeholder="Subtask comment"></textarea><button class="danger" data-del-subtask="s_mu5rnq2k_krcyip" data-task="t_mu5n85ye_q9srvh">Delete</button></div><div class="subtask-item"><input data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5ro81h_ja2egk" data-subtask-field="title" value="Visual AI model" placeholder="Subtask"><select data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5ro81h_ja2egk" data-subtask-field="status"><option value="Planning" selected="">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select><input type="date" data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5ro81h_ja2egk" data-subtask-field="deadline" value=""><textarea data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5ro81h_ja2egk" data-subtask-field="comment" placeholder="Subtask comment"></textarea><button class="danger" data-del-subtask="s_mu5ro81h_ja2egk" data-task="t_mu5n85ye_q9srvh">Delete</button></div><div class="subtask-item"><input data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rojk8_unkttx" data-subtask-field="title" value="Improvement of website outcome" placeholder="Subtask"><select data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rojk8_unkttx" data-subtask-field="status"><option value="Planning" selected="">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select><input type="date" data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rojk8_unkttx" data-subtask-field="deadline" value=""><textarea data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rojk8_unkttx" data-subtask-field="comment" placeholder="Subtask comment"></textarea><button class="danger" data-del-subtask="s_mu5rojk8_unkttx" data-task="t_mu5n85ye_q9srvh">Delete</button></div><div class="subtask-item"><input data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rotgo_qtepjr" data-subtask-field="title" value="Knowledge Base and Guard creation" placeholder="Subtask"><select data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rotgo_qtepjr" data-subtask-field="status"><option value="Planning" selected="">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select><input type="date" data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rotgo_qtepjr" data-subtask-field="deadline" value=""><textarea data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rotgo_qtepjr" data-subtask-field="comment" placeholder="Subtask comment"></textarea><button class="danger" data-del-subtask="s_mu5rotgo_qtepjr" data-task="t_mu5n85ye_q9srvh">Delete</button></div><div class="subtask-item"><input data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rpleq_emonxr" data-subtask-field="title" value="Improvement of the conversation layout and the editing layout" placeholder="Subtask"><select data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rpleq_emonxr" data-subtask-field="status"><option value="Planning" selected="">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select><input type="date" data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rpleq_emonxr" data-subtask-field="deadline" value=""><textarea data-subtask-task="t_mu5n85ye_q9srvh" data-subtask-id="s_mu5rpleq_emonxr" data-subtask-field="comment" placeholder="Subtask comment"></textarea><button class="danger" data-del-subtask="s_mu5rpleq_emonxr" data-task="t_mu5n85ye_q9srvh">Delete</button></div></div></div></td></tr><tr><td><input type="checkbox" data-id="t_mu5n9fhj_ho7k5i" data-field="done"></td><td><input data-id="t_mu5n9fhj_ho7k5i" data-field="name" value="Customer Portal (CRM)"></td><td><select data-id="t_mu5n9fhj_ho7k5i" data-field="status"><option value="Planning">Planning</option><option value="Not Started">Not Started</option><option value="In Progress" selected="">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select></td><td><select data-id="t_mu5n9fhj_ho7k5i" data-field="product"><option value="Marketing Website">Marketing Website</option><option value="Registration">Registration</option><option value="Email Client">Email Client</option><option value="CRM (Customer)" selected="">CRM (Customer)</option><option value="Website Builder">Website Builder</option></select></td><td><input data-id="t_mu5n9fhj_ho7k5i" data-field="owner" value="Frederick"></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5n9fhj_ho7k5i" data-field="nextUpdateDeadline" value="2026-09-18"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5n9fhj_ho7k5i" data-deadline-field="nextUpdateDeadline"> Awaiting deadline</label></div></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5n9fhj_ho7k5i" data-field="deadline" value="" disabled=""><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5n9fhj_ho7k5i" data-deadline-field="deadline" checked=""> Awaiting deadline</label></div></td><td><span class="deadline ">Awaiting deadline</span></td><td><button class="subtask-btn" data-toggle-subtasks="t_mu5n9fhj_ho7k5i">Subtasks <span class="subtask-count">0</span></button></td><td><textarea data-id="t_mu5n9fhj_ho7k5i" data-field="comment">Holding on the team, 
+Will have meeting tomorrow</textarea></td><td><button class="danger" data-del-task="t_mu5n9fhj_ho7k5i">Delete</button></td></tr><tr class="subtask-row"><td colspan="11"><div class="subtask-panel "><div class="subtask-head"><strong>Subtasks for Customer Portal (CRM)</strong><button data-add-subtask="t_mu5n9fhj_ho7k5i" class="primary">+ Add Subtask</button></div><div class="subtask-grid"><div class="subtask-empty">No subtasks yet.</div></div></div></td></tr><tr><td><input type="checkbox" data-id="t_mu5nbnbl_wn21d4" data-field="done"></td><td><input data-id="t_mu5nbnbl_wn21d4" data-field="name" value="Customer Portal Design"></td><td><select data-id="t_mu5nbnbl_wn21d4" data-field="status"><option value="Planning">Planning</option><option value="Not Started">Not Started</option><option value="In Progress" selected="">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select></td><td><select data-id="t_mu5nbnbl_wn21d4" data-field="product"><option value="Marketing Website">Marketing Website</option><option value="Registration">Registration</option><option value="Email Client">Email Client</option><option value="CRM (Customer)" selected="">CRM (Customer)</option><option value="Website Builder">Website Builder</option></select></td><td><input data-id="t_mu5nbnbl_wn21d4" data-field="owner" value="Frederick"></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nbnbl_wn21d4" data-field="nextUpdateDeadline" value="2026-09-18"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nbnbl_wn21d4" data-deadline-field="nextUpdateDeadline"> Awaiting deadline</label></div></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nbnbl_wn21d4" data-field="deadline" value="" disabled=""><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nbnbl_wn21d4" data-deadline-field="deadline" checked=""> Awaiting deadline</label></div></td><td><span class="deadline ">Awaiting deadline</span></td><td><button class="subtask-btn" data-toggle-subtasks="t_mu5nbnbl_wn21d4">Subtasks <span class="subtask-count">0</span></button></td><td><textarea data-id="t_mu5nbnbl_wn21d4" data-field="comment">Holding on the team, 
+Will have meeting tomorrow</textarea></td><td><button class="danger" data-del-task="t_mu5nbnbl_wn21d4">Delete</button></td></tr><tr class="subtask-row"><td colspan="11"><div class="subtask-panel "><div class="subtask-head"><strong>Subtasks for Customer Portal Design</strong><button data-add-subtask="t_mu5nbnbl_wn21d4" class="primary">+ Add Subtask</button></div><div class="subtask-grid"><div class="subtask-empty">No subtasks yet.</div></div></div></td></tr><tr><td><input type="checkbox" data-id="t_mu5nctut_jmxxri" data-field="done"></td><td><input data-id="t_mu5nctut_jmxxri" data-field="name" value="Marketing Website Design"></td><td><select data-id="t_mu5nctut_jmxxri" data-field="status"><option value="Planning">Planning</option><option value="Not Started">Not Started</option><option value="In Progress" selected="">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select></td><td><select data-id="t_mu5nctut_jmxxri" data-field="product"><option value="Marketing Website" selected="">Marketing Website</option><option value="Registration">Registration</option><option value="Email Client">Email Client</option><option value="CRM (Customer)">CRM (Customer)</option><option value="Website Builder">Website Builder</option></select></td><td><input data-id="t_mu5nctut_jmxxri" data-field="owner" value="Frederick"></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nctut_jmxxri" data-field="nextUpdateDeadline" value="2026-09-18"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nctut_jmxxri" data-deadline-field="nextUpdateDeadline"> Awaiting deadline</label></div></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nctut_jmxxri" data-field="deadline" value="" disabled=""><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nctut_jmxxri" data-deadline-field="deadline" checked=""> Awaiting deadline</label></div></td><td><span class="deadline ">Awaiting deadline</span></td><td><button class="subtask-btn" data-toggle-subtasks="t_mu5nctut_jmxxri">Subtasks <span class="subtask-count">0</span></button></td><td><textarea data-id="t_mu5nctut_jmxxri" data-field="comment">Holding on the team , will update today </textarea></td><td><button class="danger" data-del-task="t_mu5nctut_jmxxri">Delete</button></td></tr><tr class="subtask-row"><td colspan="11"><div class="subtask-panel "><div class="subtask-head"><strong>Subtasks for Marketing Website Design</strong><button data-add-subtask="t_mu5nctut_jmxxri" class="primary">+ Add Subtask</button></div><div class="subtask-grid"><div class="subtask-empty">No subtasks yet.</div></div></div></td></tr><tr><td><input type="checkbox" data-id="t_mu5nejef_dv714g" data-field="done"></td><td><input data-id="t_mu5nejef_dv714g" data-field="name" value="Email Service &amp; Client"></td><td><select data-id="t_mu5nejef_dv714g" data-field="status"><option value="Planning" selected="">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select></td><td><select data-id="t_mu5nejef_dv714g" data-field="product"><option value="Marketing Website">Marketing Website</option><option value="Registration">Registration</option><option value="Email Client" selected="">Email Client</option><option value="CRM (Customer)">CRM (Customer)</option><option value="Website Builder">Website Builder</option></select></td><td><input data-id="t_mu5nejef_dv714g" data-field="owner" value="Ayan"></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nejef_dv714g" data-field="nextUpdateDeadline" value="2026-09-27"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nejef_dv714g" data-deadline-field="nextUpdateDeadline"> Awaiting deadline</label></div></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nejef_dv714g" data-field="deadline" value="" disabled=""><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nejef_dv714g" data-deadline-field="deadline" checked=""> Awaiting deadline</label></div></td><td><span class="deadline ">Awaiting deadline</span></td><td><button class="subtask-btn" data-toggle-subtasks="t_mu5nejef_dv714g">Subtasks <span class="subtask-count">2</span></button></td><td><textarea data-id="t_mu5nejef_dv714g" data-field="comment"></textarea></td><td><button class="danger" data-del-task="t_mu5nejef_dv714g">Delete</button></td></tr><tr class="subtask-row"><td colspan="11"><div class="subtask-panel open"><div class="subtask-head"><strong>Subtasks for Email Service &amp; Client</strong><button data-add-subtask="t_mu5nejef_dv714g" class="primary">+ Add Subtask</button></div><div class="subtask-grid"><div class="subtask-item"><input data-subtask-task="t_mu5nejef_dv714g" data-subtask-id="s_mu5ru03s_t0n1u7" data-subtask-field="title" value="Email UI Finalization" placeholder="Subtask"><select data-subtask-task="t_mu5nejef_dv714g" data-subtask-id="s_mu5ru03s_t0n1u7" data-subtask-field="status"><option value="Planning" selected="">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select><input type="date" data-subtask-task="t_mu5nejef_dv714g" data-subtask-id="s_mu5ru03s_t0n1u7" data-subtask-field="deadline" value=""><textarea data-subtask-task="t_mu5nejef_dv714g" data-subtask-id="s_mu5ru03s_t0n1u7" data-subtask-field="comment" placeholder="Subtask comment"></textarea><button class="danger" data-del-subtask="s_mu5ru03s_t0n1u7" data-task="t_mu5nejef_dv714g">Delete</button></div><div class="subtask-item"><input data-subtask-task="t_mu5nejef_dv714g" data-subtask-id="s_mu5rubx0_pci2m6" data-subtask-field="title" value="Email Service Imeplementation" placeholder="Subtask"><select data-subtask-task="t_mu5nejef_dv714g" data-subtask-id="s_mu5rubx0_pci2m6" data-subtask-field="status"><option value="Planning" selected="">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select><input type="date" data-subtask-task="t_mu5nejef_dv714g" data-subtask-id="s_mu5rubx0_pci2m6" data-subtask-field="deadline" value=""><textarea data-subtask-task="t_mu5nejef_dv714g" data-subtask-id="s_mu5rubx0_pci2m6" data-subtask-field="comment" placeholder="Subtask comment"></textarea><button class="danger" data-del-subtask="s_mu5rubx0_pci2m6" data-task="t_mu5nejef_dv714g">Delete</button></div></div></div></td></tr><tr><td><input type="checkbox" data-id="t_mu5nf2y6_qv4fnx" data-field="done"></td><td><input data-id="t_mu5nf2y6_qv4fnx" data-field="name" value="ICANN Registration "></td><td><select data-id="t_mu5nf2y6_qv4fnx" data-field="status"><option value="Planning">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process" selected="">Post Completion Process</option></select></td><td><select data-id="t_mu5nf2y6_qv4fnx" data-field="product"><option value="Marketing Website">Marketing Website</option><option value="Registration" selected="">Registration</option><option value="Email Client">Email Client</option><option value="CRM (Customer)">CRM (Customer)</option><option value="Website Builder">Website Builder</option></select></td><td><input data-id="t_mu5nf2y6_qv4fnx" data-field="owner" value="Showmita Saha"></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nf2y6_qv4fnx" data-field="nextUpdateDeadline" value="2026-09-18"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nf2y6_qv4fnx" data-deadline-field="nextUpdateDeadline"> Awaiting deadline</label></div></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nf2y6_qv4fnx" data-field="deadline" value="2026-10-01"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nf2y6_qv4fnx" data-deadline-field="deadline"> Awaiting deadline</label></div></td><td><span class="deadline ok">On track</span></td><td><button class="subtask-btn" data-toggle-subtasks="t_mu5nf2y6_qv4fnx">Subtasks <span class="subtask-count">0</span></button></td><td><textarea data-id="t_mu5nf2y6_qv4fnx" data-field="comment"></textarea></td><td><button class="danger" data-del-task="t_mu5nf2y6_qv4fnx">Delete</button></td></tr><tr class="subtask-row"><td colspan="11"><div class="subtask-panel "><div class="subtask-head"><strong>Subtasks for ICANN Registration </strong><button data-add-subtask="t_mu5nf2y6_qv4fnx" class="primary">+ Add Subtask</button></div><div class="subtask-grid"><div class="subtask-empty">No subtasks yet.</div></div></div></td></tr><tr><td><input type="checkbox" data-id="t_mu5ngnwt_6l45he" data-field="done"></td><td><input data-id="t_mu5ngnwt_6l45he" data-field="name" value="Nominate Registration"></td><td><select data-id="t_mu5ngnwt_6l45he" data-field="status"><option value="Planning">Planning</option><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold" selected="">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select></td><td><select data-id="t_mu5ngnwt_6l45he" data-field="product"><option value="Marketing Website">Marketing Website</option><option value="Registration" selected="">Registration</option><option value="Email Client">Email Client</option><option value="CRM (Customer)">CRM (Customer)</option><option value="Website Builder">Website Builder</option></select></td><td><input data-id="t_mu5ngnwt_6l45he" data-field="owner" value="Showmita Saha"></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5ngnwt_6l45he" data-field="nextUpdateDeadline" value="" disabled=""><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5ngnwt_6l45he" data-deadline-field="nextUpdateDeadline" checked=""> Awaiting deadline</label></div></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5ngnwt_6l45he" data-field="deadline" value="2026-10-12"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5ngnwt_6l45he" data-deadline-field="deadline"> Awaiting deadline</label></div></td><td><span class="deadline ok">On track</span></td><td><button class="subtask-btn" data-toggle-subtasks="t_mu5ngnwt_6l45he">Subtasks <span class="subtask-count">0</span></button></td><td><textarea data-id="t_mu5ngnwt_6l45he" data-field="comment">Nick is not available, require insurance confirmation</textarea></td><td><button class="danger" data-del-task="t_mu5ngnwt_6l45he">Delete</button></td></tr><tr class="subtask-row"><td colspan="11"><div class="subtask-panel "><div class="subtask-head"><strong>Subtasks for Nominate Registration</strong><button data-add-subtask="t_mu5ngnwt_6l45he" class="primary">+ Add Subtask</button></div><div class="subtask-grid"><div class="subtask-empty">No subtasks yet.</div></div></div></td></tr><tr><td><input type="checkbox" data-id="t_mu5nilfr_gtqg29" data-field="done"></td><td><input data-id="t_mu5nilfr_gtqg29" data-field="name" value="Registrar solution onboarding"></td><td><select data-id="t_mu5nilfr_gtqg29" data-field="status"><option value="Planning">Planning</option><option value="Not Started">Not Started</option><option value="In Progress" selected="">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select></td><td><select data-id="t_mu5nilfr_gtqg29" data-field="product"><option value="Marketing Website">Marketing Website</option><option value="Registration" selected="">Registration</option><option value="Email Client">Email Client</option><option value="CRM (Customer)">CRM (Customer)</option><option value="Website Builder">Website Builder</option></select></td><td><input data-id="t_mu5nilfr_gtqg29" data-field="owner" value="Ayan"></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nilfr_gtqg29" data-field="nextUpdateDeadline" value="2026-09-18"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nilfr_gtqg29" data-deadline-field="nextUpdateDeadline"> Awaiting deadline</label></div></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nilfr_gtqg29" data-field="deadline" value="2026-09-30"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nilfr_gtqg29" data-deadline-field="deadline"> Awaiting deadline</label></div></td><td><span class="deadline ok">On track</span></td><td><button class="subtask-btn" data-toggle-subtasks="t_mu5nilfr_gtqg29">Subtasks <span class="subtask-count">0</span></button></td><td><textarea data-id="t_mu5nilfr_gtqg29" data-field="comment">Meeting on 18/09/2026</textarea></td><td><button class="danger" data-del-task="t_mu5nilfr_gtqg29">Delete</button></td></tr><tr class="subtask-row"><td colspan="11"><div class="subtask-panel "><div class="subtask-head"><strong>Subtasks for Registrar solution onboarding</strong><button data-add-subtask="t_mu5nilfr_gtqg29" class="primary">+ Add Subtask</button></div><div class="subtask-grid"><div class="subtask-empty">No subtasks yet.</div></div></div></td></tr><tr><td><input type="checkbox" data-id="t_mu5nkq03_pjufsu" data-field="done"></td><td><input data-id="t_mu5nkq03_pjufsu" data-field="name" value="Versign &amp; other registry  onoboaring"></td><td><select data-id="t_mu5nkq03_pjufsu" data-field="status"><option value="Planning">Planning</option><option value="Not Started" selected="">Not Started</option><option value="In Progress">In Progress</option><option value="Blocked">Blocked</option><option value="On Hold">On Hold</option><option value="Complete">Complete</option><option value="Post Completion Process">Post Completion Process</option></select></td><td><select data-id="t_mu5nkq03_pjufsu" data-field="product"><option value="Marketing Website">Marketing Website</option><option value="Registration" selected="">Registration</option><option value="Email Client">Email Client</option><option value="CRM (Customer)">CRM (Customer)</option><option value="Website Builder">Website Builder</option></select></td><td><input data-id="t_mu5nkq03_pjufsu" data-field="owner" value="Ayan"></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nkq03_pjufsu" data-field="nextUpdateDeadline" value="2026-09-22"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nkq03_pjufsu" data-deadline-field="nextUpdateDeadline"> Awaiting deadline</label></div></td><td><div class="deadline-edit"><input type="date" data-id="t_mu5nkq03_pjufsu" data-field="deadline" value="2026-10-15"><label class="deadline-toggle"><input type="checkbox" data-deadline-toggle="t_mu5nkq03_pjufsu" data-deadline-field="deadline"> Awaiting deadline</label></div></td><td><span class="deadline ok">On track</span></td><td><button class="subtask-btn" data-toggle-subtasks="t_mu5nkq03_pjufsu">Subtasks <span class="subtask-count">0</span></button></td><td><textarea data-id="t_mu5nkq03_pjufsu" data-field="comment">Dependent on Registrar solution &amp; Payments</textarea></td><td><button class="danger" data-del-task="t_mu5nkq03_pjufsu">Delete</button></td></tr><tr class="subtask-row"><td colspan="11"><div class="subtask-panel "><div class="subtask-head"><strong>Subtasks for Versign &amp; other registry  onoboaring</strong><button data-add-subtask="t_mu5nkq03_pjufsu" class="primary">+ Add Subtask</button></div><div class="subtask-grid"><div class="subtask-empty">No subtasks yet.</div></div></div></td></tr></tbody></table></div>
+</section>
+<section id="diagramView" class="view"><div class="panel"><div class="diagram-toolbar"><div><strong>Side-by-side Product / Process block diagram</strong><div class="note">Status is the current stage. Both Next Update and Finish deadlines are shown.</div></div><div class="row"><span class="diagram-hint">Drag product headers to rearrange, or use ◀ / ▶.</span><button id="presentBtn">Presentation mode</button></div></div></div><div class="board-wrap"><div id="productsBoard" class="products-board" style="grid-template-columns: repeat(5, minmax(310px, 1fr)); min-width: 1650px;"><section class="product-column" draggable="true" data-product="Marketing Website"><div class="product-pill"><span>Marketing Website</span><span class="reorder"><button data-move-product="Marketing Website" data-dir="-1" disabled="">◀</button><button data-move-product="Marketing Website" data-dir="1">▶</button></span></div><div class="product-line"></div><div class="owner-list"><div class="owner-branch"><div class="owner-box"><span class="owner-label">Responsible</span><strong>Frederick</strong></div><div class="owner-line"></div><div class="task-list"><div class="task-card"><div class="task-card-head"><div class="task-title">Marketing Website Design</div><span class="status-pill">In Progress</span></div><div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">2026-09-18</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">Awaiting deadline</span></div></div><div class="comment-box"><span class="label">Comments</span><span class="value">Holding on the team , will update today </span></div></div></div></div></div></div></section><section class="product-column" draggable="true" data-product="Registration"><div class="product-pill"><span>Registration</span><span class="reorder"><button data-move-product="Registration" data-dir="-1">◀</button><button data-move-product="Registration" data-dir="1">▶</button></span></div><div class="product-line"></div><div class="owner-list"><div class="owner-branch"><div class="owner-box"><span class="owner-label">Responsible</span><strong>Showmita Saha</strong></div><div class="owner-line"></div><div class="task-list"><div class="task-card"><div class="task-card-head"><div class="task-title">ICANN Registration </div><span class="status-pill">Post Completion Process</span></div><div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">2026-09-18</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">2026-10-01</span></div></div><div class="comment-box"><span class="label">Comments</span><span class="value">No comment</span></div></div></div><div class="task-card"><div class="task-card-head"><div class="task-title">Nominate Registration</div><span class="status-pill">On Hold</span></div><div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">Awaiting deadline</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">2026-10-12</span></div></div><div class="comment-box"><span class="label">Comments</span><span class="value">Nick is not available, require insurance confirmation</span></div></div></div></div></div><div class="owner-branch"><div class="owner-box"><span class="owner-label">Responsible</span><strong>Ayan</strong></div><div class="owner-line"></div><div class="task-list"><div class="task-card"><div class="task-card-head"><div class="task-title">Registrar solution onboarding</div><span class="status-pill">In Progress</span></div><div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">2026-09-18</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">2026-09-30</span></div></div><div class="comment-box"><span class="label">Comments</span><span class="value">Meeting on 18/09/2026</span></div></div></div><div class="task-card"><div class="task-card-head"><div class="task-title">Versign &amp; other registry  onoboaring</div><span class="status-pill">Not Started</span></div><div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">2026-09-22</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">2026-10-15</span></div></div><div class="comment-box"><span class="label">Comments</span><span class="value">Dependent on Registrar solution &amp; Payments</span></div></div></div></div></div></div></section><section class="product-column" draggable="true" data-product="Email Client"><div class="product-pill"><span>Email Client</span><span class="reorder"><button data-move-product="Email Client" data-dir="-1">◀</button><button data-move-product="Email Client" data-dir="1">▶</button></span></div><div class="product-line"></div><div class="owner-list"><div class="owner-branch"><div class="owner-box"><span class="owner-label">Responsible</span><strong>Ayan</strong></div><div class="owner-line"></div><div class="task-list"><div class="task-card"><div class="task-card-head"><div class="task-title">Email Service &amp; Client</div><span class="status-pill">Planning</span></div><div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">2026-09-27</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">Awaiting deadline</span></div></div><div class="comment-box"><span class="label">Comments</span><span class="value">No comment</span></div><div class="subtasks-mini"><span class="label">Subtasks (2)</span><div>• <b>Email UI Finalization</b> — Planning</div><div>• <b>Email Service Imeplementation</b> — Planning</div></div></div></div></div></div></div></section><section class="product-column" draggable="true" data-product="CRM (Customer)"><div class="product-pill"><span>CRM (Customer)</span><span class="reorder"><button data-move-product="CRM (Customer)" data-dir="-1">◀</button><button data-move-product="CRM (Customer)" data-dir="1">▶</button></span></div><div class="product-line"></div><div class="owner-list"><div class="owner-branch"><div class="owner-box"><span class="owner-label">Responsible</span><strong>Frederick</strong></div><div class="owner-line"></div><div class="task-list"><div class="task-card"><div class="task-card-head"><div class="task-title">Customer Portal (CRM)</div><span class="status-pill">In Progress</span></div><div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">2026-09-18</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">Awaiting deadline</span></div></div><div class="comment-box"><span class="label">Comments</span><span class="value">Holding on the team, 
+Will have meeting tomorrow</span></div></div></div><div class="task-card"><div class="task-card-head"><div class="task-title">Customer Portal Design</div><span class="status-pill">In Progress</span></div><div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">2026-09-18</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">Awaiting deadline</span></div></div><div class="comment-box"><span class="label">Comments</span><span class="value">Holding on the team, 
+Will have meeting tomorrow</span></div></div></div></div></div></div></section><section class="product-column" draggable="true" data-product="Website Builder"><div class="product-pill"><span>Website Builder</span><span class="reorder"><button data-move-product="Website Builder" data-dir="-1">◀</button><button data-move-product="Website Builder" data-dir="1" disabled="">▶</button></span></div><div class="product-line"></div><div class="owner-list"><div class="owner-branch"><div class="owner-box"><span class="owner-label">Responsible</span><strong>Frederick</strong></div><div class="owner-line"></div><div class="task-list"><div class="task-card"><div class="task-card-head"><div class="task-title">AI Website Builder Tool </div><span class="status-pill">In Progress</span></div><div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">No deadline</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">2026-09-21</span></div></div><div class="comment-box"><span class="label">Comments</span><span class="value">Holding on the team, 
+Will have meeting tomorrow</span></div><div class="subtasks-mini"><span class="label">Subtasks (6)</span><div>• <b>Website transfer (By code/url)</b> — Planning</div><div>• <b>Hidden Pages Alert</b> — Planning</div><div>• <b>Visual AI model</b> — Planning</div><div>• <b>Improvement of website outcome</b> — Planning</div><div>• <b>Knowledge Base and Guard creation</b> — Planning</div><div>• <b>Improvement of the conversation layout and the editing layout</b> — Planning</div></div></div></div></div></div></div></section></div></div></section>
+<section id="calendarView" class="view"><div class="panel"><strong>Deadline Calendar</strong><div class="note">Blue = next update deadline. Orange = finish deadline. “Awaiting deadline” and “Ongoing — No Fixed End Date” do not appear as finish dates on the calendar.</div></div><div class="cal-head"><button id="prevMonth">← Previous</button><h2 id="monthTitle" style="margin:0">September 2026</h2><button id="nextMonth">Next →</button></div><div id="calendar" class="calendar"><div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div><div class="weekday">Sun</div><div class="day muted"><div class="date-num">31</div></div><div class="day "><div class="date-num">1</div></div><div class="day "><div class="date-num">2</div></div><div class="day "><div class="date-num">3</div></div><div class="day "><div class="date-num">4</div></div><div class="day "><div class="date-num">5</div></div><div class="day "><div class="date-num">6</div></div><div class="day "><div class="date-num">7</div></div><div class="day "><div class="date-num">8</div></div><div class="day "><div class="date-num">9</div></div><div class="day "><div class="date-num">10</div></div><div class="day "><div class="date-num">11</div></div><div class="day "><div class="date-num">12</div></div><div class="day "><div class="date-num">13</div></div><div class="day "><div class="date-num">14</div></div><div class="day "><div class="date-num">15</div></div><div class="day "><div class="date-num">16</div></div><div class="day "><div class="date-num">17</div></div><div class="day "><div class="date-num">18</div><div class="event update"><b>Customer Portal (CRM)</b><span>Next update · In Progress</span></div><div class="event update"><b>Customer Portal Design</b><span>Next update · In Progress</span></div><div class="event update"><b>Marketing Website Design</b><span>Next update · In Progress</span></div><div class="event update"><b>ICANN Registration </b><span>Next update · Post Completion Process</span></div><div class="event update"><b>Registrar solution onboarding</b><span>Next update · In Progress</span></div></div><div class="day "><div class="date-num">19</div></div><div class="day "><div class="date-num">20</div></div><div class="day "><div class="date-num">21</div><div class="event finish"><b>AI Website Builder Tool </b><span>Finish · In Progress</span></div></div><div class="day "><div class="date-num">22</div><div class="event update"><b>Versign &amp; other registry  onoboaring</b><span>Next update · Not Started</span></div></div><div class="day "><div class="date-num">23</div></div><div class="day "><div class="date-num">24</div></div><div class="day "><div class="date-num">25</div></div><div class="day "><div class="date-num">26</div></div><div class="day "><div class="date-num">27</div><div class="event update"><b>Email Service &amp; Client</b><span>Next update · Planning</span></div></div><div class="day "><div class="date-num">28</div></div><div class="day "><div class="date-num">29</div></div><div class="day "><div class="date-num">30</div><div class="event finish"><b>Registrar solution onboarding</b><span>Finish · In Progress</span></div></div><div class="day muted"><div class="date-num">1</div><div class="event finish"><b>ICANN Registration </b><span>Finish · Post Completion Process</span></div></div><div class="day muted"><div class="date-num">2</div></div><div class="day muted"><div class="date-num">3</div></div><div class="day muted"><div class="date-num">4</div></div><div class="day muted"><div class="date-num">5</div></div><div class="day muted"><div class="date-num">6</div></div><div class="day muted"><div class="date-num">7</div></div><div class="day muted"><div class="date-num">8</div></div><div class="day muted"><div class="date-num">9</div></div><div class="day muted"><div class="date-num">10</div></div><div class="day muted"><div class="date-num">11</div></div></div></section>
+</div>
+<script>
+(function(){
+"use strict";
+const STORE="cortexGripFullTracker_v3";
+const statuses=["Planning","Not Started","In Progress","Blocked","On Hold","Complete","Post Completion Process"];
+const embedded=JSON.parse(document.getElementById("snapshotData").textContent);
+let data=load(),calDate=new Date(2026,8,1),viewsDirty=false,expandedSubtasks=new Set(),dragProduct=null;
+function migrate(){
+  data.tasks.forEach(t=>{if(!Array.isArray(t.subtasks))t.subtasks=[];if(t.nextUpdateDeadline==null)t.nextUpdateDeadline="";if(t.deadline==="Not confirmed yet")t.deadline="Awaiting deadline";if(t.nextUpdateDeadline==="Not confirmed yet")t.nextUpdateDeadline="Awaiting deadline"});
+  if(!Array.isArray(data.diagramTaskOrder))data.diagramTaskOrder=data.tasks.map(t=>t.id);
+  const ids=new Set(data.tasks.map(t=>t.id));
+  data.diagramTaskOrder=data.diagramTaskOrder.filter(id=>ids.has(id));
+  data.tasks.forEach(t=>{if(!data.diagramTaskOrder.includes(t.id))data.diagramTaskOrder.push(t.id)});
+}
+function load(){try{const raw=localStorage.getItem(STORE);if(raw){const p=JSON.parse(raw);if(Array.isArray(p.products)&&Array.isArray(p.tasks))return p}}catch(e){}return JSON.parse(JSON.stringify(embedded))}
+function save(){localStorage.setItem(STORE,JSON.stringify(data))}
+function uid(prefix="t"){return prefix+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
+function isDate(v){return /^\d{4}-\d{2}-\d{2}$/.test(v||"")}
+function formatDisplayDate(v){
+  if(!isDate(v))return v||"";
+  const [y,m,d]=v.split("-").map(Number);
+  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"];
+  return d+" "+months[m-1]+" "+y;
+}
+function statusClass(v){return "status-"+String(v||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")}
+function deadlineInfoValue(v,done){if(done)return{text:"Completed",cls:"done"};if(v==="Ongoing — No Fixed End Date")return{text:"Ongoing — No Fixed End Date",cls:"ongoing"};if(v==="Awaiting deadline")return{text:"Awaiting deadline",cls:""};if(!v)return{text:"No deadline",cls:""};const a=new Date();a.setHours(0,0,0,0);const b=new Date(v+"T00:00:00"),d=Math.ceil((b-a)/86400000);if(d<0)return{text:"Overdue by "+Math.abs(d)+" day"+(Math.abs(d)===1?"":"s"),cls:"overdue"};if(d===0)return{text:"Due today",cls:"soon"};if(d<=3)return{text:"Due in "+d+" day"+(d===1?"":"s"),cls:"soon"};return{text:"On track",cls:"ok"}}
+function setDirty(){viewsDirty=true;const b=document.getElementById("syncViews");if(b){b.classList.add("pending");b.textContent="Update Diagram & Calendar • changes pending"}const s=document.getElementById("syncState");if(s)s.textContent="Changes pending — click Update Diagram & Calendar."}
+function syncViews(){renderDiagram();renderCalendar();viewsDirty=false;const b=document.getElementById("syncViews");if(b){b.classList.remove("pending");b.textContent="Update Diagram & Calendar"}const s=document.getElementById("syncState");if(s)s.textContent="Diagram & calendar updated from the task list."}
+function addProduct(){const e=document.getElementById("newProduct"),n=e.value.trim();if(!n){e.focus();return}if(data.products.some(x=>x.toLowerCase()===n.toLowerCase())){alert("That Product / Process already exists.");return}data.products.push(n);e.value="";save();renderProducts();renderTasks();setDirty()}
+function deleteProduct(i){const p=data.products[i];if(data.tasks.some(t=>t.product===p)){alert("This Product / Process is assigned to a task. Reassign those tasks first.");return}data.products.splice(i,1);save();renderProducts();renderTasks();setDirty()}
+function renameProduct(i,newName){
+  const oldName=data.products[i];newName=String(newName||"").trim();
+  if(!newName){renderProducts();return}
+  if(newName===oldName)return;
+  if(data.products.some((p,idx)=>idx!==i&&p.toLowerCase()===newName.toLowerCase())){alert("That Product / Process already exists.");renderProducts();return}
+  data.products[i]=newName;
+  data.tasks.forEach(t=>{if(t.product===oldName)t.product=newName});
+  save();renderProducts();renderTasks();setDirty();
+}
+function addTask(){const t={id:uid(),name:"",status:"Planning",product:data.products[0]||"",owner:"",nextUpdateDeadline:"",deadline:"",comment:"",done:false,subtasks:[]};data.tasks.push(t);data.diagramTaskOrder.push(t.id);save();renderTasks();setDirty()}
+function updateTask(id,f,v){const t=data.tasks.find(x=>x.id===id);if(!t)return;t[f]=v;if(f==="done")t.status=v?"Complete":"In Progress";if(f==="status")t.done=v==="Complete";save();renderTasks();setDirty()}
+function toggleDeadline(id,field,checked){const t=data.tasks.find(x=>x.id===id);if(!t)return;t[field]=checked?"Awaiting deadline":"";save();renderTasks();setDirty()}
+function setDeadlineMode(id,field,mode){const t=data.tasks.find(x=>x.id===id);if(!t)return;if(mode==="awaiting")t[field]="Awaiting deadline";else if(mode==="ongoing"&&field==="deadline")t[field]="Ongoing — No Fixed End Date";else if(mode==="date")t[field]="";save();renderTasks();setDirty()}
+function deleteTask(id){data.tasks=data.tasks.filter(t=>t.id!==id);data.diagramTaskOrder=data.diagramTaskOrder.filter(x=>x!==id);expandedSubtasks.delete(id);save();renderTasks();setDirty()}
+function addSubtask(taskId){const t=data.tasks.find(x=>x.id===taskId);if(!t)return;t.subtasks.push({id:uid("s"),title:"",status:"Planning",deadline:"",comment:""});expandedSubtasks.add(taskId);save();renderTasks();setDirty()}
+function updateSubtask(taskId,subId,field,value){const t=data.tasks.find(x=>x.id===taskId);if(!t)return;const s=t.subtasks.find(x=>x.id===subId);if(!s)return;s[field]=value;save();renderTasks();setDirty()}
+function deleteSubtask(taskId,subId){const t=data.tasks.find(x=>x.id===taskId);if(!t)return;t.subtasks=t.subtasks.filter(x=>x.id!==subId);save();renderTasks();setDirty()}
+function renderProducts(){document.getElementById("productList").innerHTML=data.products.map((p,i)=>'<span class="product-chip"><input data-edit-prod="'+i+'" value="'+esc(p)+'" aria-label="Edit Product / Process"><button data-del-prod="'+i+'" title="Delete Product / Process">×</button></span>').join("");const f=document.getElementById("productFilter"),old=f.value;f.innerHTML='<option value="">All Product / Process</option>'+data.products.map(p=>'<option value="'+esc(p)+'">'+esc(p)+'</option>').join("");if(data.products.includes(old))f.value=old;const sf=document.getElementById("statusFilter"),sOld=sf.value;sf.innerHTML='<option value="">All statuses</option>'+statuses.map(s=>'<option>'+s+'</option>').join("");if(statuses.includes(sOld))sf.value=sOld}
+function deadlineEditor(t,field){
+  const v=t[field]||"",awaiting=v==="Awaiting deadline",ongoing=v==="Ongoing — No Fixed End Date",isFinish=field==="deadline";
+  const mode=ongoing?"ongoing":awaiting?"awaiting":"date";
+  return '<div class="deadline-edit"><select data-deadline-mode="'+t.id+'" data-deadline-field="'+field+'"><option value="date" '+(mode==="date"?'selected':'')+'>Set date</option><option value="awaiting" '+(mode==="awaiting"?'selected':'')+'>Awaiting deadline</option>'+(isFinish?'<option value="ongoing" '+(mode==="ongoing"?'selected':'')+'>Ongoing — No Fixed End Date</option>':'')+'</select><input type="date" data-id="'+t.id+'" data-field="'+field+'" value="'+((awaiting||ongoing)?"":esc(v))+'" '+((awaiting||ongoing)?'disabled':'')+'></div>'
+}
+function subtaskPanel(t){const open=expandedSubtasks.has(t.id),items=t.subtasks||[];const rows=items.length?items.map(s=>'<div class="subtask-item"><input data-subtask-task="'+t.id+'" data-subtask-id="'+s.id+'" data-subtask-field="title" value="'+esc(s.title)+'" placeholder="Subtask"><select class="status-select '+statusClass(s.status)+'" data-subtask-task="'+t.id+'" data-subtask-id="'+s.id+'" data-subtask-field="status">'+statuses.map(st=>'<option value="'+st+'" '+(s.status===st?'selected':'')+'>'+st+'</option>').join("")+'</select><input type="date" data-subtask-task="'+t.id+'" data-subtask-id="'+s.id+'" data-subtask-field="deadline" value="'+esc(s.deadline||'')+'"><textarea data-subtask-task="'+t.id+'" data-subtask-id="'+s.id+'" data-subtask-field="comment" placeholder="Subtask comment">'+esc(s.comment||'')+'</textarea><button class="danger" data-del-subtask="'+s.id+'" data-task="'+t.id+'">Delete</button></div>').join(""):'<div class="subtask-empty">No subtasks yet.</div>';return '<tr class="subtask-row"><td colspan="11"><div class="subtask-panel '+(open?'open':'')+'"><div class="subtask-head"><strong>Subtasks for '+esc(t.name||'Untitled task')+'</strong><button data-add-subtask="'+t.id+'" class="primary">+ Add Subtask</button></div><div class="subtask-grid">'+rows+'</div></div></td></tr>'}
+function renderTasks(){const q=document.getElementById("search").value.toLowerCase(),sf=document.getElementById("statusFilter").value,pf=document.getElementById("productFilter").value;const list=data.tasks.filter(t=>{const sub=(t.subtasks||[]).map(s=>s.title+' '+s.comment).join(' ');return(!q||(t.name+' '+t.owner+' '+t.comment+' '+sub).toLowerCase().includes(q))&&(!sf||t.status===sf)&&(!pf||t.product===pf)});document.getElementById("taskBody").innerHTML=list.map(t=>{const d=deadlineInfoValue(t.deadline,t.done||t.status==="Complete"),prod=data.products.map(p=>'<option value="'+esc(p)+'" '+(t.product===p?'selected':'')+'>'+esc(p)+'</option>').join(""),sts=statuses.map(s=>'<option value="'+s+'" '+(t.status===s?'selected':'')+'>'+s+'</option>').join(""),count=(t.subtasks||[]).length;return '<tr><td><input type="checkbox" data-id="'+t.id+'" data-field="done" '+(t.done?'checked':'')+'></td><td><input data-id="'+t.id+'" data-field="name" value="'+esc(t.name)+'"></td><td><select class="status-select '+statusClass(t.status)+'" data-id="'+t.id+'" data-field="status">'+sts+'</select></td><td><select data-id="'+t.id+'" data-field="product">'+prod+'</select></td><td><input data-id="'+t.id+'" data-field="owner" value="'+esc(t.owner)+'"></td><td>'+deadlineEditor(t,'nextUpdateDeadline')+'</td><td>'+deadlineEditor(t,'deadline')+'</td><td><span class="deadline '+d.cls+'">'+d.text+'</span></td><td><button class="subtask-btn" data-toggle-subtasks="'+t.id+'">Subtasks <span class="subtask-count">'+count+'</span></button></td><td><textarea data-id="'+t.id+'" data-field="comment">'+esc(t.comment)+'</textarea></td><td><button class="danger" data-del-task="'+t.id+'">Delete</button></td></tr>'+subtaskPanel(t)}).join("");const total=data.tasks.length,done=data.tasks.filter(t=>t.done||t.status==="Complete").length,overdue=data.tasks.filter(t=>deadlineInfoValue(t.deadline,t.done||t.status==="Complete").cls==="overdue").length;document.getElementById("totalStat").textContent=total;document.getElementById("doneStat").textContent=done;document.getElementById("overdueStat").textContent=overdue;document.getElementById("progressStat").textContent=total?Math.round(done/total*100):0}
+function moveProduct(name,dir){const i=data.products.indexOf(name),j=i+dir;if(i<0||j<0||j>=data.products.length)return;[data.products[i],data.products[j]]=[data.products[j],data.products[i]];save();renderProducts();renderDiagram()}
+function reorderProduct(from,to){const a=data.products.indexOf(from),b=data.products.indexOf(to);if(a<0||b<0||a===b)return;const [x]=data.products.splice(a,1);data.products.splice(b,0,x);save();renderProducts();renderDiagram()}
+function orderedTasksFor(product,owner){
+  const pos=new Map(data.diagramTaskOrder.map((id,i)=>[id,i]));
+  return data.tasks.filter(t=>t.product===product&&(((t.owner||"").trim()||"Unassigned")===owner))
+    .sort((a,b)=>(pos.get(a.id)??999999)-(pos.get(b.id)??999999));
+}
+function moveDiagramTask(taskId,dir){
+  const task=data.tasks.find(t=>t.id===taskId);if(!task)return;
+  const owner=(task.owner||"").trim()||"Unassigned";
+  const siblings=orderedTasksFor(task.product,owner);
+  const i=siblings.findIndex(t=>t.id===taskId),j=i+dir;
+  if(i<0||j<0||j>=siblings.length)return;
+  const a=data.diagramTaskOrder.indexOf(siblings[i].id),b=data.diagramTaskOrder.indexOf(siblings[j].id);
+  [data.diagramTaskOrder[a],data.diagramTaskOrder[b]]=[data.diagramTaskOrder[b],data.diagramTaskOrder[a]];
+  save();renderDiagram();
+}
+function reorderDiagramTask(fromId,toId){
+  if(fromId===toId)return;
+  const from=data.tasks.find(t=>t.id===fromId),to=data.tasks.find(t=>t.id===toId);if(!from||!to)return;
+  const fromOwner=(from.owner||"").trim()||"Unassigned",toOwner=(to.owner||"").trim()||"Unassigned";
+  if(from.product!==to.product||fromOwner!==toOwner)return;
+  const a=data.diagramTaskOrder.indexOf(fromId),b=data.diagramTaskOrder.indexOf(toId);
+  if(a<0||b<0)return;
+  data.diagramTaskOrder.splice(a,1);
+  const newB=data.diagramTaskOrder.indexOf(toId);
+  data.diagramTaskOrder.splice(newB,0,fromId);
+  save();renderDiagram();
+}
+function renderDiagram(){
+  const board=document.getElementById("productsBoard");if(!board)return;
+  board.style.gridTemplateColumns='repeat('+Math.max(data.products.length,1)+',minmax(310px,1fr))';
+  board.style.minWidth=Math.max(1550,data.products.length*330)+'px';
+  board.innerHTML=data.products.map((product,pi)=>{
+    const ownerNames=[];
+    data.tasks.filter(t=>t.product===product).forEach(t=>{const o=(t.owner||"").trim()||"Unassigned";if(!ownerNames.includes(o))ownerNames.push(o)});
+    const ownerHtml=ownerNames.map(owner=>{
+      const arr=orderedTasksFor(product,owner);
+      return '<div class="owner-branch"><div class="owner-box"><span class="owner-label">Responsible</span><strong>'+esc(owner)+'</strong></div><div class="owner-line"></div><div class="task-list">'+
+      arr.map((t,ti)=>{
+        const mini=(t.subtasks||[]).length?'<div class="subtasks-mini"><span class="label">Subtasks ('+t.subtasks.length+')</span>'+t.subtasks.map(s=>'<div>• <b>'+esc(s.title||"Untitled subtask")+'</b> — '+esc(s.status)+(s.deadline?' · '+esc(isDate(s.deadline)?formatDisplayDate(s.deadline):s.deadline):'')+'</div>').join('')+'</div>':'';
+        return '<div class="task-card" draggable="true" data-diagram-task="'+t.id+'">'+
+          '<div class="task-card-head"><div class="task-head-main"><div class="task-title">'+esc(t.name||"Untitled task")+'</div><span class="status-pill '+statusClass(t.status)+'">'+esc(t.status)+'</span></div>'+
+          '<div class="task-reorder"><button data-move-task="'+t.id+'" data-task-dir="-1" '+(ti===0?'disabled':'')+'>↑</button><button data-move-task="'+t.id+'" data-task-dir="1" '+(ti===arr.length-1?'disabled':'')+'>↓</button></div></div>'+
+          '<div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">'+esc(isDate(t.nextUpdateDeadline)?formatDisplayDate(t.nextUpdateDeadline):(t.nextUpdateDeadline||"No deadline"))+'</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">'+esc(isDate(t.deadline)?formatDisplayDate(t.deadline):(t.deadline||"No deadline"))+'</span></div></div>'+
+          '<div class="comment-box"><span class="label">Comments</span><span class="value">'+esc(t.comment||"No comment").replaceAll("\\n","<br>")+'</span></div>'+mini+'</div></div>';
+      }).join('')+'</div></div>';
+    }).join('');
+    return '<section class="product-column" draggable="true" data-product="'+esc(product)+'"><div class="product-pill"><span>'+esc(product)+'</span><span class="reorder"><button data-move-product="'+esc(product)+'" data-dir="-1" '+(pi===0?'disabled':'')+'>◀</button><button data-move-product="'+esc(product)+'" data-dir="1" '+(pi===data.products.length-1?'disabled':'')+'>▶</button></span></div><div class="product-line"></div><div class="owner-list">'+ownerHtml+'</div></section>';
+  }).join('');
+}
+function renderCalendar(){const y=calDate.getFullYear(),m=calDate.getMonth();document.getElementById("monthTitle").textContent=new Intl.DateTimeFormat(undefined,{month:"long",year:"numeric"}).format(new Date(y,m,1));const wd=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];let out=wd.map(x=>'<div class="weekday">'+x+'</div>').join('');const first=new Date(y,m,1),off=(first.getDay()+6)%7,start=new Date(y,m,1-off);for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const updates=data.tasks.filter(t=>isDate(t.nextUpdateDeadline)&&t.nextUpdateDeadline===iso),finishes=data.tasks.filter(t=>isDate(t.deadline)&&t.deadline===iso);out+='<div class="day '+(d.getMonth()!==m?'muted':'')+'"><div class="date-num">'+d.getDate()+'</div>'+updates.map(t=>'<div class="event update"><b>'+esc(t.name)+'</b><span>Next update · '+esc(t.status)+'</span></div>').join('')+finishes.map(t=>'<div class="event finish"><b>'+esc(t.name)+'</b><span>Finish · '+esc(t.status)+'</span></div>').join('')+'</div>'}document.getElementById("calendar").innerHTML=out}
+function renderAll(){migrate();renderProducts();renderTasks();renderDiagram();renderCalendar()}
+function downloadBlob(name,text,type="text/html;charset=utf-8"){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
+function exportCSV(){const rows=[["Task Name","Status","Product / Process","Responsible","Next Update Deadline","Finish Deadline","Completed","Subtask Count","Comment"],...data.tasks.map(t=>[t.name,t.status,t.product,t.owner,t.nextUpdateDeadline,t.deadline,t.done?"Yes":"No",(t.subtasks||[]).length,t.comment])];downloadBlob("cortexgrip-task-list.csv",rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\\n'),"text/csv;charset=utf-8")}
+function staticDiagramHtml(){
+  syncViews();
+  const source=document.getElementById("productsBoard");
+  const clone=source.cloneNode(true);
+  clone.querySelectorAll("button").forEach(x=>x.remove());
+  clone.querySelectorAll("[draggable]").forEach(x=>x.removeAttribute("draggable"));
+  clone.querySelectorAll("[data-diagram-task]").forEach(x=>x.removeAttribute("data-diagram-task"));
+  clone.querySelectorAll("[data-product]").forEach(x=>x.removeAttribute("data-product"));
+  return clone.outerHTML;
+}
+function staticTaskTableHtml(){
+  const rows=data.tasks.map(t=>{
+    const sub=(t.subtasks||[]).length?'<div class="readonly-subtasks"><b>Subtasks:</b> '+t.subtasks.map(s=>esc(s.title||"Untitled")+' ('+esc(s.status)+')').join(' • ')+'</div>':'';
+    return '<tr><td>'+(t.done?'✓':'')+'</td><td>'+esc(t.name)+sub+'</td><td><span class="status-badge '+statusClass(t.status)+'">'+esc(t.status)+'</span></td><td>'+esc(t.product)+'</td><td>'+esc(t.owner)+'</td><td>'+esc(t.nextUpdateDeadline||"")+'</td><td>'+esc(t.deadline||"")+'</td><td>'+esc(t.comment).replaceAll("\\n","<br>")+'</td></tr>';
+  }).join('');
+  return '<div class="table-wrap"><table class="readonly-table"><thead><tr><th>✓</th><th>Task</th><th>Status</th><th>Product / Process</th><th>Responsible</th><th>Next Update</th><th>Finish Deadline / Ongoing</th><th>Comment</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+function reportShell(title,body){
+  const styles=document.querySelector("style").textContent;
+  return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(title)+'</title><style>'+styles+'</style></head><body><div class="readonly-wrap"><div class="brand"><span class="logo"></span><div><div class="brand-name">CortexGrip</div><div class="sub">'+esc(title)+'</div></div></div>'+body+'</div></body></html>';
+}
+function standalone(kind){
+  syncViews();
+  if(kind==="tasks")return reportShell("Task List",staticTaskTableHtml());
+  if(kind==="diagram")return reportShell("Product / Process Diagram",'<div class="board-wrap">'+staticDiagramHtml()+'</div>');
+  return reportShell("Deadline Calendar",'<h2>'+esc(document.getElementById("monthTitle").textContent)+'</h2>'+document.getElementById("calendar").outerHTML);
+}
+function downloadCombined(){
+  syncViews();
+  const body='<div class="readonly-section"><h2>Task List</h2>'+staticTaskTableHtml()+'</div>'+
+    '<div class="readonly-section"><h2>Product / Process Diagram</h2><div class="board-wrap">'+staticDiagramHtml()+'</div></div>'+
+    '<div class="readonly-section"><h2>Deadline Calendar — '+esc(document.getElementById("monthTitle").textContent)+'</h2>'+document.getElementById("calendar").outerHTML+'</div>';
+  downloadBlob("cortexgrip-combined-read-only.html",reportShell("Combined Project Report",body));
+}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.view).classList.add('active')}));
+const syncBtn=document.getElementById('syncViews');if(syncBtn)syncBtn.onclick=syncViews;document.getElementById('addProduct').onclick=addProduct;document.getElementById('newProduct').addEventListener('keydown',e=>{if(e.key==='Enter')addProduct()});document.getElementById('addTask').onclick=addTask;document.getElementById('search').oninput=renderTasks;document.getElementById('statusFilter').onchange=renderTasks;document.getElementById('productFilter').onchange=renderTasks;const csvBtn=document.getElementById('csvBtn');if(csvBtn)csvBtn.onclick=exportCSV;document.getElementById('productList').onclick=e=>{const b=e.target.closest('[data-del-prod]');if(b)deleteProduct(Number(b.dataset.delProd))};
+document.getElementById('productList').addEventListener('change',e=>{const x=e.target.closest('[data-edit-prod]');if(x)renameProduct(Number(x.dataset.editProd),x.value)});
+document.getElementById('productList').addEventListener('keydown',e=>{const x=e.target.closest('[data-edit-prod]');if(x&&e.key==='Enter'){e.preventDefault();x.blur()}});
+document.getElementById('taskBody').addEventListener('change',e=>{const x=e.target;if(x.dataset.deadlineMode){setDeadlineMode(x.dataset.deadlineMode,x.dataset.deadlineField,x.value);return}if(x.dataset.subtaskTask){updateSubtask(x.dataset.subtaskTask,x.dataset.subtaskId,x.dataset.subtaskField,x.value);return}if(!x.dataset.id||!x.dataset.field)return;updateTask(x.dataset.id,x.dataset.field,x.type==='checkbox'?x.checked:x.value)});
+document.getElementById('taskBody').onclick=e=>{const del=e.target.closest('[data-del-task]');if(del){deleteTask(del.dataset.delTask);return}const ts=e.target.closest('[data-toggle-subtasks]');if(ts){const id=ts.dataset.toggleSubtasks;expandedSubtasks.has(id)?expandedSubtasks.delete(id):expandedSubtasks.add(id);renderTasks();return}const add=e.target.closest('[data-add-subtask]');if(add){addSubtask(add.dataset.addSubtask);return}const ds=e.target.closest('[data-del-subtask]');if(ds){deleteSubtask(ds.dataset.task,ds.dataset.delSubtask);return}};
+document.getElementById('productsBoard').addEventListener('click',e=>{const tb=e.target.closest('[data-move-task]');if(tb){moveDiagramTask(tb.dataset.moveTask,Number(tb.dataset.taskDir));return}const b=e.target.closest('[data-move-product]');if(b)moveProduct(b.dataset.moveProduct,Number(b.dataset.dir))});
+let dragTask=null;
+document.getElementById('productsBoard').addEventListener('dragstart',e=>{
+  const task=e.target.closest('[data-diagram-task]');
+  if(task){dragTask=task.dataset.diagramTask;task.classList.add('task-dragging');e.stopPropagation();return}
+  const c=e.target.closest('[data-product]');if(!c)return;dragProduct=c.dataset.product;c.classList.add('dragging');
+});
+document.getElementById('productsBoard').addEventListener('dragend',e=>{
+  const task=e.target.closest('[data-diagram-task]');if(task)task.classList.remove('task-dragging');
+  const c=e.target.closest('[data-product]');if(c)c.classList.remove('dragging');
+  dragTask=null;dragProduct=null;
+});
+document.getElementById('productsBoard').addEventListener('dragover',e=>{if(dragTask||dragProduct)e.preventDefault()});
+document.getElementById('productsBoard').addEventListener('drop',e=>{
+  e.preventDefault();
+  if(dragTask){const target=e.target.closest('[data-diagram-task]');if(target)reorderDiagramTask(dragTask,target.dataset.diagramTask);dragTask=null;return}
+  const c=e.target.closest('[data-product]');if(c&&dragProduct)reorderProduct(dragProduct,c.dataset.product);
+});
+document.getElementById('prevMonth').onclick=()=>{calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1);renderCalendar()};document.getElementById('nextMonth').onclick=()=>{calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);renderCalendar()};const dlTasksBtn=document.getElementById('dlTasks');if(dlTasksBtn)dlTasksBtn.onclick=()=>downloadBlob('cortexgrip-task-list.html',standalone('tasks'));const dlDiagramBtn=document.getElementById('dlDiagram');if(dlDiagramBtn)dlDiagramBtn.onclick=()=>downloadBlob('cortexgrip-product-diagram.html',standalone('diagram'));const dlCalendarBtn=document.getElementById('dlCalendar');if(dlCalendarBtn)dlCalendarBtn.onclick=()=>downloadBlob('cortexgrip-calendar.html',standalone('calendar'));const dlAllBtn=document.getElementById('dlAll');if(dlAllBtn)dlAllBtn.onclick=downloadCombined;
+renderAll();
+})();
+</script>
+
+<script>
+(function(){
+"use strict";
+var menu=document.getElementById("dlMenu");
+if(menu){
+  menu.addEventListener("click",function(e){if(e.target.closest(".dl-pop button"))menu.removeAttribute("open")});
+  document.addEventListener("click",function(e){if(menu.hasAttribute("open")&&!menu.contains(e.target))menu.removeAttribute("open")});
+}
+var pBtn=document.getElementById("presentBtn"),exitBtn=document.getElementById("exitPresent");
+function enterPresent(){
+  document.body.classList.add("presenting");
+  var el=document.documentElement;
+  if(el.requestFullscreen){var pr=el.requestFullscreen();if(pr&&pr.catch)pr.catch(function(){})}
+}
+function exitPresent(){
+  document.body.classList.remove("presenting");
+  if(document.fullscreenElement&&document.exitFullscreen){var pr=document.exitFullscreen();if(pr&&pr.catch)pr.catch(function(){})}
+}
+if(pBtn)pBtn.onclick=enterPresent;
+if(exitBtn)exitBtn.onclick=exitPresent;
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&document.body.classList.contains("presenting"))exitPresent()});
+document.addEventListener("fullscreenchange",function(){if(!document.fullscreenElement)document.body.classList.remove("presenting")});
+})();
+</script>
+</body></html>
