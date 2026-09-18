@@ -53,17 +53,14 @@ export async function onRequestPost(context) {
 
   if (clean(input.company, 100)) return json({ ok: true });
   const submittedBy = clean(input.submittedBy, 60);
-  const title = clean(input.title, 140);
-  const description = clean(input.description, 1200);
-  const deadline = clean(input.deadline, 10);
   const people = await readPeople(context.env.DEADLINES);
   if (!people.includes(submittedBy)) return json({ error: "Choose your name from the list." }, 400);
-  if (!title || !description || !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) return json({ error: "Complete the title, brief description, and deadline." }, 400);
-
-  const item = { id: crypto.randomUUID(), submittedBy, title, description, deadline, submittedAt: new Date().toISOString() };
+  const raw = Array.isArray(input.deliverables) ? input.deliverables.slice(0, 25) : [input];
+  const submittedAt = new Date().toISOString();
+  const created = raw.map(entry => ({ id: crypto.randomUUID(), submittedBy, title: clean(entry.title, 140), description: clean(entry.description, 1200), deadline: clean(entry.deadline, 10), submittedAt }));
+  if (!created.length || created.some(item => !item.title || !item.description || !/^\d{4}-\d{2}-\d{2}$/.test(item.deadline))) return json({ error: "Complete the title, brief description, and deadline for every deliverable." }, 400);
   const items = await readItems(context.env.DEADLINES);
-  items.unshift(item);
-  await context.env.DEADLINES.put(DATA_KEY, JSON.stringify(items.slice(0, 500)));
+  await context.env.DEADLINES.put(DATA_KEY, JSON.stringify([...created.reverse(), ...items].slice(0, 500)));
 
-  return json({ ok: true }, 201);
+  return json({ ok: true, count: created.length }, 201);
 }
