@@ -321,6 +321,7 @@ td:last-child,th:last-child{padding-right:14px}
 .deadline-submission p{margin:0;color:var(--secondary-foreground);white-space:pre-wrap}
 .deadline-submission-meta{font-size:12.5px;color:var(--muted-foreground)}
 .deadline-submission-date{font-weight:650;color:var(--primary)}
+.deadline-submission input,.deadline-submission textarea{width:100%}.deadline-submission textarea{min-height:90px;resize:vertical}.deadline-submission-actions{display:grid;gap:8px;align-content:start}
 .theme-toggle{min-width:112px}
 
 /* ---------------- responsive ---------------- */
@@ -682,7 +683,7 @@ async function renderDeadlineUpdates(){
     const payload=await response.json(),items=Array.isArray(payload.items)?payload.items:[];
     if(!items.length){status.textContent="No deadline updates have been submitted yet.";return}
     status.style.display="none";
-    list.innerHTML=items.map(item=>'<article class="deadline-submission"><div><h3>'+esc(item.title||"Untitled")+'</h3><div class="deadline-submission-meta">Submitted by '+esc(item.submittedBy||"Unknown")+' · '+esc(formatMeetingDateTime(item.submittedAt))+'</div></div><p>'+esc(item.description||"")+'</p><div><div class="deadline-submission-meta">Deadline</div><div class="deadline-submission-date">'+esc(formatDisplayDate(item.deadline)||item.deadline||"Not set")+'</div></div></article>').join("");
+    list.innerHTML=items.map(item=>'<article class="deadline-submission" data-deadline-item="'+esc(item.id)+'"><div><input data-deadline-edit="title" value="'+esc(item.title||"")+'"><div class="deadline-submission-meta">Submitted by '+esc(item.submittedBy||"Unknown")+' · '+esc(formatMeetingDateTime(item.submittedAt))+'</div></div><textarea data-deadline-edit="description">'+esc(item.description||"")+'</textarea><div class="deadline-submission-actions"><label class="deadline-submission-meta">Deadline</label><input type="date" data-deadline-edit="deadline" value="'+esc(item.deadline||"")+'"><button type="button" class="primary" data-save-deadline>Save changes</button><span class="deadline-submission-meta" data-save-status></span></div></article>').join("");
   }catch(e){status.textContent="Deadline updates are unavailable until the Cloudflare storage binding is configured."}
 }
 function renderAll(){migrate();renderProducts();renderTasks();renderDiagram();renderCalendar();renderMeetings();updateThemeButton();renderDeadlineUpdates()}
@@ -755,6 +756,7 @@ document.getElementById('meetingNotesList').addEventListener('input',e=>{const x
 document.getElementById('meetingNotesList').onclick=e=>{const b=e.target.closest('[data-del-meeting-note]');if(b)deleteMeetingNote(b.dataset.delMeetingNote)};
 document.getElementById('themeToggle').onclick=toggleTheme;
 document.getElementById('refreshDeadlineUpdates').onclick=renderDeadlineUpdates;
+document.getElementById('deadlineUpdatesList').onclick=async e=>{const button=e.target.closest('[data-save-deadline]');if(!button)return;let adminKey=sessionStorage.getItem('cortexGripAdminKey');if(!adminKey){adminKey=prompt('Enter your private CortexGrip admin key');if(!adminKey)return;sessionStorage.setItem('cortexGripAdminKey',adminKey)}const card=button.closest('[data-deadline-item]'),status=card.querySelector('[data-save-status]'),values={action:'updateItem',id:card.dataset.deadlineItem};card.querySelectorAll('[data-deadline-edit]').forEach(x=>values[x.dataset.deadlineEdit]=x.value);button.disabled=true;status.textContent='Saving...';try{const response=await fetch('/api/deadlines',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminKey},body:JSON.stringify(values)}),payload=await response.json();if(!response.ok){if(response.status===401)sessionStorage.removeItem('cortexGripAdminKey');throw new Error(payload.error||'Unable to save')}status.textContent='Saved'}catch(error){status.textContent=error.message}finally{button.disabled=false}};
 renderAll();
 })();
 </script>
