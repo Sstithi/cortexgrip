@@ -20,6 +20,7 @@
     button{height:40px;padding:0 15px;border:1px solid var(--input);border-radius:9px;background:var(--card);color:var(--text);cursor:pointer;font-weight:600}button:hover{background:var(--muted)}button.primary{width:100%;margin-top:20px;background:var(--primary);border-color:var(--primary);color:#fff}button.primary:hover{background:var(--primary-hover)}button:disabled{opacity:.6;cursor:not-allowed}
     .status{display:none;margin-top:16px;padding:12px 13px;border-radius:9px;background:var(--muted);font-size:13px}.status.show{display:block}.status.error{color:var(--danger)}
     .deliverables{display:grid;gap:14px;margin-top:18px}.deliverable{position:relative;padding:17px;border:1px solid var(--border);border-radius:12px;background:var(--muted)}.deliverable h2{margin:0 0 4px;font-size:15px}.remove-deliverable{position:absolute;right:12px;top:10px;height:30px;color:var(--danger)}.add-deliverable{width:100%;margin-top:14px}
+    .submitted{margin-top:20px}.submitted h2{margin:0 0 12px;font-size:18px}.submitted-list{display:grid;gap:10px}.submitted-item{padding:14px;border:1px solid var(--border);border-radius:10px;background:var(--muted)}.submitted-item h3{margin:0 0 5px;font-size:15px}.submitted-item p{margin:7px 0;white-space:pre-wrap;color:var(--sub)}.submitted-meta{font-size:12px;color:var(--sub)}
     .privacy{margin:16px 2px 0;color:var(--sub);font-size:12.5px;line-height:1.5}.hp{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
     @media(max-width:520px){.page{padding-top:16px}.top{align-items:flex-start}.card{padding:17px}h1{font-size:21px}}
   </style>
@@ -41,16 +42,19 @@
         <div id="formStatus" class="status" role="status" aria-live="polite"></div>
       </form>
     </section>
+    <section class="card submitted"><h2>Submitted deliverables</h2><div id="submittedList" class="submitted-list">Loading...</div></section>
     <p class="privacy">Only submit work-related deadline information. The submission time is recorded automatically.</p>
   </main>
   <script>
     (function(){
       "use strict";
-      const root=document.documentElement,themeButton=document.getElementById("themeToggle"),form=document.getElementById("deadlineForm"),status=document.getElementById("formStatus"),submitButton=document.getElementById("submitButton"),submittedBy=document.getElementById("submittedBy"),deliverables=document.getElementById("deliverables"),addDeliverable=document.getElementById("addDeliverable");
+      const root=document.documentElement,themeButton=document.getElementById("themeToggle"),form=document.getElementById("deadlineForm"),status=document.getElementById("formStatus"),submitButton=document.getElementById("submitButton"),submittedBy=document.getElementById("submittedBy"),deliverables=document.getElementById("deliverables"),addDeliverable=document.getElementById("addDeliverable"),submittedList=document.getElementById("submittedList");
+      function esc(value){return String(value||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
       function theme(){return root.dataset.theme==="dark"?"dark":"light"}
       function updateThemeButton(){themeButton.textContent=theme()==="dark"?"Light mode":"Dark mode"}
       themeButton.onclick=function(){const next=theme()==="dark"?"light":"dark";root.dataset.theme=next;try{localStorage.setItem("cortexGripTheme",next)}catch(e){}updateThemeButton()};updateThemeButton();
       async function loadPeople(){try{const response=await fetch("/api/deadlines?view=people",{headers:{Accept:"application/json"}}),payload=await response.json();if(!response.ok)throw new Error();submittedBy.innerHTML='<option value="">Select your name</option>'+payload.people.map(name=>'<option value="'+String(name).replaceAll('&','&amp;').replaceAll('"','&quot;')+'">'+String(name).replaceAll('&','&amp;').replaceAll('<','&lt;')+'</option>').join('')}catch(e){submittedBy.innerHTML='<option value="">People list unavailable</option>';status.className="status show error";status.textContent="The people list is unavailable. Please try again later."}}loadPeople();
+      async function loadSubmitted(){try{const response=await fetch("/api/deadlines",{headers:{Accept:"application/json"}}),payload=await response.json();if(!response.ok)throw new Error();submittedList.innerHTML=payload.items.length?payload.items.map(item=>'<article class="submitted-item"><h3>'+esc(item.title)+'</h3><div class="submitted-meta">'+esc(item.submittedBy)+' · deadline '+esc(item.deadline)+'</div><p>'+esc(item.description)+'</p></article>').join(""):"No deliverables submitted yet."}catch(e){submittedList.textContent="Submitted deliverables are temporarily unavailable."}}loadSubmitted();
       function addRow(){const row=document.createElement("section");row.className="deliverable";row.innerHTML='<h2>Deliverable</h2><button type="button" class="remove-deliverable">Remove</button><div class="field"><label>Title</label><input data-field="title" maxlength="140" required placeholder="What is this deliverable?"></div><div class="field"><label>Brief description</label><textarea data-field="description" maxlength="1200" required placeholder="Add the context Showmita needs..."></textarea></div><div class="field"><label>Deadline</label><input data-field="deadline" type="date" required></div>';deliverables.appendChild(row);updateRows()}
       function updateRows(){const rows=[...deliverables.children];rows.forEach((row,i)=>{row.querySelector("h2").textContent="Deliverable "+(i+1);row.querySelector(".remove-deliverable").style.display=rows.length===1?"none":"inline-flex"})}
       addDeliverable.onclick=addRow;deliverables.onclick=function(event){const button=event.target.closest(".remove-deliverable");if(button){button.closest(".deliverable").remove();updateRows()}};addRow();
@@ -61,7 +65,7 @@
         try{
           const response=await fetch("/api/deadlines",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(values)});
           const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||"Unable to submit the deadline update.");
-          status.className="status show";status.textContent=payload.count+" deliverable"+(payload.count===1?" has":"s have")+" been submitted and are now visible in the tracker.";form.reset();deliverables.innerHTML="";addRow();
+          status.className="status show";status.textContent=payload.count+" deliverable"+(payload.count===1?" has":"s have")+" been submitted and are now visible in the tracker.";form.reset();deliverables.innerHTML="";addRow();loadSubmitted();
         }catch(error){status.className="status show error";status.textContent=error.message||"Unable to submit. Please try again."}
         finally{submitButton.disabled=false;submitButton.textContent="Submit deliverables"}
       });
