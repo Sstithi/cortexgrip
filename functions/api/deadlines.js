@@ -19,7 +19,11 @@ function clean(value, maxLength) {
 
 async function readItems(namespace) {
   const stored = await namespace.get(DATA_KEY, "json");
-  return Array.isArray(stored) ? stored : [];
+  const items = Array.isArray(stored) ? stored : [];
+  const cutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  const active = items.filter(item => !item.completedAt || new Date(item.completedAt).getTime() > cutoff);
+  if (active.length !== items.length) await namespace.put(DATA_KEY, JSON.stringify(active));
+  return active;
 }
 
 async function readPeople(namespace) {
@@ -58,7 +62,8 @@ export async function onRequestPost(context) {
     if (!item) return json({ error: "Deliverable not found." }, 404);
     const title = clean(input.title, 140), description = clean(input.description, 1200), deadline = clean(input.deadline, 10);
     if (!title || !description || !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) return json({ error: "Complete the title, brief description, and deadline." }, 400);
-    Object.assign(item, { title, description, deadline, updatedAt: new Date().toISOString() });
+    const done = input.done === true;
+    Object.assign(item, { title, description, deadline, done, completedAt: done ? (item.completedAt || new Date().toISOString()) : null, updatedAt: new Date().toISOString() });
     await context.env.DEADLINES.put(DATA_KEY, JSON.stringify(items));
     return json({ ok: true, item });
   }
@@ -69,7 +74,7 @@ export async function onRequestPost(context) {
   if (!people.includes(submittedBy)) return json({ error: "Choose your name from the list." }, 400);
   const raw = Array.isArray(input.deliverables) ? input.deliverables.slice(0, 25) : [input];
   const submittedAt = new Date().toISOString();
-  const created = raw.map(entry => ({ id: crypto.randomUUID(), submittedBy, title: clean(entry.title, 140), description: clean(entry.description, 1200), deadline: clean(entry.deadline, 10), submittedAt }));
+  const created = raw.map(entry => ({ id: crypto.randomUUID(), submittedBy, title: clean(entry.title, 140), description: clean(entry.description, 1200), deadline: clean(entry.deadline, 10), submittedAt, done: false, completedAt: null }));
   if (!created.length || created.some(item => !item.title || !item.description || !/^\d{4}-\d{2}-\d{2}$/.test(item.deadline))) return json({ error: "Complete the title, brief description, and deadline for every deliverable." }, 400);
   const items = await readItems(context.env.DEADLINES);
   await context.env.DEADLINES.put(DATA_KEY, JSON.stringify([...created.reverse(), ...items].slice(0, 500)));
