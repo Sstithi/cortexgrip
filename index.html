@@ -3,6 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CortexGrip Product / Process Tracker</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("cortexGripTheme")||((window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light")}catch(e){document.documentElement.dataset.theme="light"}</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -45,12 +46,24 @@
   --chevron:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'><path d='M1 1.2 5 5.2 9 1.2' fill='none' stroke='%2379706B' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
   color-scheme:light;
 }
+[data-theme="dark"]{
+  color-scheme:dark;
+  --background:#11100F;--card:#1C1A18;--muted:#282522;--muted-50:#211F1D;
+  --border:#3A3632;--input:#4B4540;--foreground:#F5F2EF;--secondary-foreground:#DED8D2;
+  --muted-foreground:#AAA19A;--primary:#FF6A45;--primary-hover:#F24E29;
+  --ring:rgba(255,106,69,.35);--primary-wash:rgba(255,106,69,.13);
+  --info:#7DA9F5;--info-wash:rgba(125,169,245,.12);--good:#4ADE80;--warn:#FBBF24;--bad:#FB7185;
+  --shadow-xs:0 1px 2px rgba(0,0,0,.35);--shadow-sm:0 2px 8px rgba(0,0,0,.38);--shadow-md:0 4px 18px rgba(0,0,0,.44);
+}
 *{box-sizing:border-box}
 body{
   margin:0;font-family:var(--font);font-size:14px;line-height:1.5;
   color:var(--foreground);background:var(--background);
   -webkit-font-smoothing:antialiased;accent-color:var(--primary);
+  transition:background-color .18s ease,color .18s ease;
 }
+[data-theme="dark"] .tab:hover{background:rgba(255,255,255,.06)}
+[data-theme="dark"] .logo{filter:brightness(0) invert(1)}
 button,input,select,textarea{font:inherit}
 ::selection{background:rgba(242,78,41,.16)}
 :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
@@ -283,6 +296,33 @@ td:last-child,th:last-child{padding-right:14px}
 .readonly-subtasks{font-size:11.5px;color:var(--muted-foreground);margin-top:5px;line-height:1.5}
 .readonly-subtasks b{color:var(--secondary-foreground);font-weight:550}
 
+/* ---------------- meeting notes ---------------- */
+.meeting-layout{display:grid;grid-template-columns:minmax(250px,320px) minmax(0,1fr);gap:16px;align-items:start}
+.people-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.person-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 8px 6px 11px;border:1px solid var(--border);border-radius:999px;background:var(--muted-50);font-size:13px}
+.person-chip button{width:24px;height:24px;padding:0;border-radius:999px;box-shadow:none}
+.attendee-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:12px 0}
+.attendee-option{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius-ctl);background:var(--muted-50);font-size:13px;cursor:pointer}
+.attendee-option input{width:auto}
+.meeting-empty{padding:26px;border:1px dashed var(--input);border-radius:var(--radius-card);color:var(--muted-foreground);text-align:center;background:var(--muted-50)}
+.meeting-notes-list{display:grid;gap:12px}
+.meeting-note{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--card);box-shadow:var(--shadow-xs);overflow:hidden}
+.meeting-note-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--muted-50)}
+.meeting-note-meta{display:grid;gap:3px}
+.meeting-note-time{font-weight:650;color:var(--foreground)}
+.meeting-note-people{font-size:12.5px;color:var(--muted-foreground)}
+.meeting-note-body{display:grid;gap:10px;padding:14px 16px}
+.meeting-note-body input{font-weight:600}
+.meeting-note-body textarea{min-height:150px;resize:vertical;line-height:1.55}
+.meeting-note-actions{display:flex;justify-content:flex-end}
+.deadline-submission-list{display:grid;gap:12px;margin-top:14px}
+.deadline-submission{display:grid;grid-template-columns:minmax(170px,.7fr) minmax(220px,1.3fr) 150px;gap:14px;padding:15px 16px;border:1px solid var(--border);border-radius:var(--radius-card);background:var(--card);box-shadow:var(--shadow-xs)}
+.deadline-submission h3{margin:0 0 5px;font-size:15px}
+.deadline-submission p{margin:0;color:var(--secondary-foreground);white-space:pre-wrap}
+.deadline-submission-meta{font-size:12.5px;color:var(--muted-foreground)}
+.deadline-submission-date{font-weight:650;color:var(--primary)}
+.theme-toggle{min-width:112px}
+
 /* ---------------- responsive ---------------- */
 @media(max-width:1100px){
   header{align-items:flex-start}
@@ -296,6 +336,8 @@ td:last-child,th:last-child{padding-right:14px}
   .deadline-pair{grid-template-columns:1fr}
   header{padding:12px 14px}
   .logo{width:148px;height:32px}
+  .meeting-layout{grid-template-columns:1fr}
+  .deadline-submission{grid-template-columns:1fr}
 }
 @media(max-width:700px){
   body{font-size:15px}
@@ -392,6 +434,7 @@ body.presenting .owner-label,body.presenting .label{font-size:11.5px}
 <header>
 <div class="brand"><span class="logo"></span><div><div class="brand-name">CortexGrip</div><div class="sub">Product / Process tracker, block diagram and deadline calendar</div></div></div>
 <div class="export-grid">
+<button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch colour theme">Dark mode</button>
 <button id="syncViews" class="primary sync">Update Diagram &amp; Calendar</button>
 <details class="dl-menu" id="dlMenu">
 <summary title="Downloads" aria-label="Download options"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><svg class="dl-caret" width="10" height="7" viewBox="0 0 10 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 1.2 5 5.2 9 1.2"/></svg></summary>
@@ -404,7 +447,7 @@ body.presenting .owner-label,body.presenting .label{font-size:11.5px}
 </details>
 </div>
 </header>
-<div class="tabs"><button class="tab active" data-view="tasksView">Task List</button><button class="tab" data-view="diagramView">Product Diagram</button><button class="tab" data-view="calendarView">Calendar</button></div>
+<div class="tabs"><button class="tab active" data-view="tasksView">Task List</button><button class="tab" data-view="diagramView">Product Diagram</button><button class="tab" data-view="calendarView">Calendar</button><button class="tab" data-view="meetingsView">Meeting Notes</button><button class="tab" data-view="deadlineUpdatesView">Deadline Updates</button></div>
 
 <div class="panel" id="statusLegendPanel">
   <strong>Status colour key</strong>
@@ -434,6 +477,46 @@ Will have meeting tomorrow</span></div></div></div><div class="task-card"><div c
 Will have meeting tomorrow</span></div></div></div></div></div></div></section><section class="product-column" draggable="true" data-product="Website Builder"><div class="product-pill"><span>Website Builder</span><span class="reorder"><button data-move-product="Website Builder" data-dir="-1">◀</button><button data-move-product="Website Builder" data-dir="1" disabled="">▶</button></span></div><div class="product-line"></div><div class="owner-list"><div class="owner-branch"><div class="owner-box"><span class="owner-label">Responsible</span><strong>Frederick</strong></div><div class="owner-line"></div><div class="task-list"><div class="task-card"><div class="task-card-head"><div class="task-title">AI Website Builder Tool </div><span class="status-pill">In Progress</span></div><div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">No deadline</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">2026-09-21</span></div></div><div class="comment-box"><span class="label">Comments</span><span class="value">Holding on the team, 
 Will have meeting tomorrow</span></div><div class="subtasks-mini"><span class="label">Subtasks (6)</span><div>• <b>Website transfer (By code/url)</b> — Planning</div><div>• <b>Hidden Pages Alert</b> — Planning</div><div>• <b>Visual AI model</b> — Planning</div><div>• <b>Improvement of website outcome</b> — Planning</div><div>• <b>Knowledge Base and Guard creation</b> — Planning</div><div>• <b>Improvement of the conversation layout and the editing layout</b> — Planning</div></div></div></div></div></div></div></section></div></div></section>
 <section id="calendarView" class="view"><div class="panel"><strong>Deadline Calendar</strong><div class="note">Blue = next update deadline. Orange = finish deadline. “Awaiting deadline” and “Ongoing — No Fixed End Date” do not appear as finish dates on the calendar.</div></div><div class="cal-head"><button id="prevMonth">← Previous</button><h2 id="monthTitle" style="margin:0">September 2026</h2><button id="nextMonth">Next →</button></div><div id="calendar" class="calendar"><div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div><div class="weekday">Sun</div><div class="day muted"><div class="date-num">31</div></div><div class="day "><div class="date-num">1</div></div><div class="day "><div class="date-num">2</div></div><div class="day "><div class="date-num">3</div></div><div class="day "><div class="date-num">4</div></div><div class="day "><div class="date-num">5</div></div><div class="day "><div class="date-num">6</div></div><div class="day "><div class="date-num">7</div></div><div class="day "><div class="date-num">8</div></div><div class="day "><div class="date-num">9</div></div><div class="day "><div class="date-num">10</div></div><div class="day "><div class="date-num">11</div></div><div class="day "><div class="date-num">12</div></div><div class="day "><div class="date-num">13</div></div><div class="day "><div class="date-num">14</div></div><div class="day "><div class="date-num">15</div></div><div class="day "><div class="date-num">16</div></div><div class="day "><div class="date-num">17</div></div><div class="day "><div class="date-num">18</div><div class="event update"><b>Customer Portal (CRM)</b><span>Next update · In Progress</span></div><div class="event update"><b>Customer Portal Design</b><span>Next update · In Progress</span></div><div class="event update"><b>Marketing Website Design</b><span>Next update · In Progress</span></div><div class="event update"><b>ICANN Registration </b><span>Next update · Post Completion Process</span></div><div class="event update"><b>Registrar solution onboarding</b><span>Next update · In Progress</span></div></div><div class="day "><div class="date-num">19</div></div><div class="day "><div class="date-num">20</div></div><div class="day "><div class="date-num">21</div><div class="event finish"><b>AI Website Builder Tool </b><span>Finish · In Progress</span></div></div><div class="day "><div class="date-num">22</div><div class="event update"><b>Versign &amp; other registry  onoboaring</b><span>Next update · Not Started</span></div></div><div class="day "><div class="date-num">23</div></div><div class="day "><div class="date-num">24</div></div><div class="day "><div class="date-num">25</div></div><div class="day "><div class="date-num">26</div></div><div class="day "><div class="date-num">27</div><div class="event update"><b>Email Service &amp; Client</b><span>Next update · Planning</span></div></div><div class="day "><div class="date-num">28</div></div><div class="day "><div class="date-num">29</div></div><div class="day "><div class="date-num">30</div><div class="event finish"><b>Registrar solution onboarding</b><span>Finish · In Progress</span></div></div><div class="day muted"><div class="date-num">1</div><div class="event finish"><b>ICANN Registration </b><span>Finish · Post Completion Process</span></div></div><div class="day muted"><div class="date-num">2</div></div><div class="day muted"><div class="date-num">3</div></div><div class="day muted"><div class="date-num">4</div></div><div class="day muted"><div class="date-num">5</div></div><div class="day muted"><div class="date-num">6</div></div><div class="day muted"><div class="date-num">7</div></div><div class="day muted"><div class="date-num">8</div></div><div class="day muted"><div class="date-num">9</div></div><div class="day muted"><div class="date-num">10</div></div><div class="day muted"><div class="date-num">11</div></div></div></section>
+
+<section id="meetingsView" class="view">
+  <div class="meeting-layout">
+    <div>
+      <div class="panel">
+        <strong>People</strong>
+        <div class="note">Add the people you meet with. Existing tracker data is kept unchanged.</div>
+        <div class="row" style="margin-top:10px">
+          <input id="newMeetingPerson" placeholder="Person's name..." style="flex:1;min-width:180px">
+          <button id="addMeetingPerson" class="primary">+ Add Person</button>
+        </div>
+        <div id="meetingPeopleList" class="people-list"></div>
+      </div>
+      <div class="panel">
+        <strong>Start a meeting note</strong>
+        <div class="note">Choose one or more people. The start date and time are captured when you click the button.</div>
+        <div id="meetingAttendees" class="attendee-list"></div>
+        <button id="startMeetingNote" class="primary">Start Meeting Note</button>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <strong>Meeting notes</strong>
+        <div class="note">Newest notes appear first and save automatically while you type.</div>
+      </div>
+      <div id="meetingNotesList" class="meeting-notes-list"></div>
+    </div>
+  </div>
+</section>
+
+<section id="deadlineUpdatesView" class="view">
+  <div class="panel">
+    <div class="diagram-toolbar">
+      <div><strong>Deliverable and deadline updates</strong><div class="note">People added under Meeting Notes can submit through the separate public page.</div></div>
+      <div class="row"><a href="deadlines.html" target="_blank" rel="noopener"><button type="button">Open public form</button></a><button id="refreshDeadlineUpdates" class="primary" type="button">Refresh updates</button></div>
+    </div>
+  </div>
+  <div id="deadlineUpdatesStatus" class="meeting-empty">Loading deadline updates...</div>
+  <div id="deadlineUpdatesList" class="deadline-submission-list"></div>
+</section>
 </div>
 <script>
 (function(){
@@ -444,6 +527,8 @@ const embedded=JSON.parse(document.getElementById("snapshotData").textContent);
 let data=load(),calDate=new Date(2026,8,1),viewsDirty=false,expandedSubtasks=new Set(),dragProduct=null;
 function migrate(){
   data.tasks.forEach(t=>{if(!Array.isArray(t.subtasks))t.subtasks=[];if(t.nextUpdateDeadline==null)t.nextUpdateDeadline="";if(t.deadline==="Not confirmed yet")t.deadline="Awaiting deadline";if(t.nextUpdateDeadline==="Not confirmed yet")t.nextUpdateDeadline="Awaiting deadline"});
+  if(!Array.isArray(data.meetingPeople))data.meetingPeople=[];
+  if(!Array.isArray(data.meetingNotes))data.meetingNotes=[];
   if(!Array.isArray(data.diagramTaskOrder))data.diagramTaskOrder=data.tasks.map(t=>t.id);
   const ids=new Set(data.tasks.map(t=>t.id));
   data.diagramTaskOrder=data.diagramTaskOrder.filter(id=>ids.has(id));
@@ -543,7 +628,64 @@ function renderDiagram(){
   }).join('');
 }
 function renderCalendar(){const y=calDate.getFullYear(),m=calDate.getMonth();document.getElementById("monthTitle").textContent=new Intl.DateTimeFormat(undefined,{month:"long",year:"numeric"}).format(new Date(y,m,1));const wd=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];let out=wd.map(x=>'<div class="weekday">'+x+'</div>').join('');const first=new Date(y,m,1),off=(first.getDay()+6)%7,start=new Date(y,m,1-off);for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const updates=data.tasks.filter(t=>isDate(t.nextUpdateDeadline)&&t.nextUpdateDeadline===iso),finishes=data.tasks.filter(t=>isDate(t.deadline)&&t.deadline===iso);out+='<div class="day '+(d.getMonth()!==m?'muted':'')+'"><div class="date-num">'+d.getDate()+'</div>'+updates.map(t=>'<div class="event update"><b>'+esc(t.name)+'</b><span>Next update · '+esc(t.status)+'</span></div>').join('')+finishes.map(t=>'<div class="event finish"><b>'+esc(t.name)+'</b><span>Finish · '+esc(t.status)+'</span></div>').join('')+'</div>'}document.getElementById("calendar").innerHTML=out}
-function renderAll(){migrate();renderProducts();renderTasks();renderDiagram();renderCalendar()}
+async function syncDeliverablePeople(){
+  try{await fetch("/api/deadlines",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"setPeople",people:data.meetingPeople.map(p=>p.name)})})}catch(e){}
+}
+function addMeetingPerson(){
+  const input=document.getElementById("newMeetingPerson"),name=input.value.trim();
+  if(!name){input.focus();return}
+  if(data.meetingPeople.some(p=>p.name.toLowerCase()===name.toLowerCase())){alert("That person is already in the list.");return}
+  data.meetingPeople.push({id:uid("p"),name});input.value="";save();renderMeetings();syncDeliverablePeople();input.focus();
+}
+function deleteMeetingPerson(id){
+  const person=data.meetingPeople.find(p=>p.id===id);if(!person)return;
+  if(data.meetingNotes.some(n=>(n.personIds||[]).includes(id))){alert("This person is linked to an existing meeting note and cannot be removed.");return}
+  if(!confirm('Remove '+person.name+' from the people list?'))return;
+  data.meetingPeople=data.meetingPeople.filter(p=>p.id!==id);save();renderMeetings();syncDeliverablePeople();
+}
+function startMeetingNote(){
+  const selected=[...document.querySelectorAll('[data-meeting-attendee]:checked')].map(x=>x.dataset.meetingAttendee);
+  if(!selected.length){alert("Choose at least one person for this meeting.");return}
+  const names=selected.map(id=>data.meetingPeople.find(p=>p.id===id)).filter(Boolean).map(p=>p.name);
+  const note={id:uid("m"),personIds:selected,attendeeNames:names,startedAt:new Date().toISOString(),title:"",body:""};
+  data.meetingNotes.push(note);save();renderMeetings();
+  const title=document.querySelector('[data-meeting-note="'+note.id+'"][data-note-field="title"]');if(title)title.focus();
+}
+function updateMeetingNote(id,field,value){const note=data.meetingNotes.find(n=>n.id===id);if(!note)return;note[field]=value;save()}
+function deleteMeetingNote(id){
+  if(!confirm("Delete this meeting note? This cannot be undone."))return;
+  data.meetingNotes=data.meetingNotes.filter(n=>n.id!==id);save();renderMeetings();
+}
+function formatMeetingDateTime(value){
+  const d=new Date(value);if(Number.isNaN(d.getTime()))return "Unknown start time";
+  return new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(d);
+}
+function renderMeetings(){
+  const people=document.getElementById("meetingPeopleList"),attendees=document.getElementById("meetingAttendees"),notes=document.getElementById("meetingNotesList");
+  if(!people||!attendees||!notes)return;
+  people.innerHTML=data.meetingPeople.length?data.meetingPeople.map(p=>'<span class="person-chip"><span>'+esc(p.name)+'</span><button data-del-meeting-person="'+p.id+'" title="Remove '+esc(p.name)+'">×</button></span>').join(""):'<span class="note">No people added yet.</span>';
+  attendees.innerHTML=data.meetingPeople.length?data.meetingPeople.map(p=>'<label class="attendee-option"><input type="checkbox" data-meeting-attendee="'+p.id+'"> <span>'+esc(p.name)+'</span></label>').join(""):'<div class="meeting-empty">Add someone before starting a meeting note.</div>';
+  const ordered=[...data.meetingNotes].sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt));
+  notes.innerHTML=ordered.length?ordered.map(n=>{
+    const names=(n.attendeeNames&&n.attendeeNames.length?n.attendeeNames:(n.personIds||[]).map(id=>{const p=data.meetingPeople.find(x=>x.id===id);return p?p.name:"Removed person"})).join(", ");
+    return '<article class="meeting-note"><div class="meeting-note-head"><div class="meeting-note-meta"><span class="meeting-note-time">'+esc(formatMeetingDateTime(n.startedAt))+'</span><span class="meeting-note-people">With '+esc(names||"No attendees")+'</span></div><button class="danger" data-del-meeting-note="'+n.id+'">Delete</button></div><div class="meeting-note-body"><input data-meeting-note="'+n.id+'" data-note-field="title" value="'+esc(n.title||"")+'" placeholder="Meeting title or subject"><textarea data-meeting-note="'+n.id+'" data-note-field="body" placeholder="Write meeting notes, decisions, and follow-ups...">'+esc(n.body||"")+'</textarea><div class="meeting-note-actions"><span class="note">Saved automatically</span></div></div></article>';
+  }).join(""):'<div class="meeting-empty">No meeting notes yet. Choose people and start your first note.</div>';
+}
+function currentTheme(){return document.documentElement.dataset.theme==="dark"?"dark":"light"}
+function updateThemeButton(){const b=document.getElementById("themeToggle");if(b)b.textContent=currentTheme()==="dark"?"Light mode":"Dark mode"}
+function toggleTheme(){const next=currentTheme()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("cortexGripTheme",next)}catch(e){}updateThemeButton()}
+async function renderDeadlineUpdates(){
+  const status=document.getElementById("deadlineUpdatesStatus"),list=document.getElementById("deadlineUpdatesList");if(!status||!list)return;
+  status.style.display="block";status.textContent="Loading deadline updates...";list.innerHTML="";
+  try{
+    const response=await fetch("/api/deadlines",{headers:{Accept:"application/json"}});if(!response.ok)throw new Error("Request failed");
+    const payload=await response.json(),items=Array.isArray(payload.items)?payload.items:[];
+    if(!items.length){status.textContent="No deadline updates have been submitted yet.";return}
+    status.style.display="none";
+    list.innerHTML=items.map(item=>'<article class="deadline-submission"><div><h3>'+esc(item.title||"Untitled")+'</h3><div class="deadline-submission-meta">Submitted by '+esc(item.submittedBy||"Unknown")+' · '+esc(formatMeetingDateTime(item.submittedAt))+'</div></div><p>'+esc(item.description||"")+'</p><div><div class="deadline-submission-meta">Deadline</div><div class="deadline-submission-date">'+esc(formatDisplayDate(item.deadline)||item.deadline||"Not set")+'</div></div></article>').join("");
+  }catch(e){status.textContent="Deadline updates are unavailable until the Cloudflare storage binding is configured."}
+}
+function renderAll(){migrate();renderProducts();renderTasks();renderDiagram();renderCalendar();renderMeetings();updateThemeButton();renderDeadlineUpdates()}
 function downloadBlob(name,text,type="text/html;charset=utf-8"){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
 function exportCSV(){const rows=[["Task Name","Status","Product / Process","Responsible","Next Update Deadline","Finish Deadline","Completed","Subtask Count","Comment"],...data.tasks.map(t=>[t.name,t.status,t.product,t.owner,t.nextUpdateDeadline,t.deadline,t.done?"Yes":"No",(t.subtasks||[]).length,t.comment])];downloadBlob("cortexgrip-task-list.csv",rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\\n'),"text/csv;charset=utf-8")}
 function staticDiagramHtml(){
@@ -605,6 +747,14 @@ document.getElementById('productsBoard').addEventListener('drop',e=>{
   const c=e.target.closest('[data-product]');if(c&&dragProduct)reorderProduct(dragProduct,c.dataset.product);
 });
 document.getElementById('prevMonth').onclick=()=>{calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1);renderCalendar()};document.getElementById('nextMonth').onclick=()=>{calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);renderCalendar()};const dlTasksBtn=document.getElementById('dlTasks');if(dlTasksBtn)dlTasksBtn.onclick=()=>downloadBlob('cortexgrip-task-list.html',standalone('tasks'));const dlDiagramBtn=document.getElementById('dlDiagram');if(dlDiagramBtn)dlDiagramBtn.onclick=()=>downloadBlob('cortexgrip-product-diagram.html',standalone('diagram'));const dlCalendarBtn=document.getElementById('dlCalendar');if(dlCalendarBtn)dlCalendarBtn.onclick=()=>downloadBlob('cortexgrip-calendar.html',standalone('calendar'));const dlAllBtn=document.getElementById('dlAll');if(dlAllBtn)dlAllBtn.onclick=downloadCombined;
+document.getElementById('addMeetingPerson').onclick=addMeetingPerson;
+document.getElementById('newMeetingPerson').addEventListener('keydown',e=>{if(e.key==='Enter')addMeetingPerson()});
+document.getElementById('startMeetingNote').onclick=startMeetingNote;
+document.getElementById('meetingPeopleList').onclick=e=>{const b=e.target.closest('[data-del-meeting-person]');if(b)deleteMeetingPerson(b.dataset.delMeetingPerson)};
+document.getElementById('meetingNotesList').addEventListener('input',e=>{const x=e.target.closest('[data-meeting-note]');if(x)updateMeetingNote(x.dataset.meetingNote,x.dataset.noteField,x.value)});
+document.getElementById('meetingNotesList').onclick=e=>{const b=e.target.closest('[data-del-meeting-note]');if(b)deleteMeetingNote(b.dataset.delMeetingNote)};
+document.getElementById('themeToggle').onclick=toggleTheme;
+document.getElementById('refreshDeadlineUpdates').onclick=renderDeadlineUpdates;
 renderAll();
 })();
 </script>
