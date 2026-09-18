@@ -51,6 +51,18 @@ export async function onRequestPost(context) {
     return json({ ok: true, people });
   }
 
+  if (input.action === "updateItem") {
+    const suppliedKey = (context.request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+    if (!context.env.ADMIN_KEY || suppliedKey !== context.env.ADMIN_KEY) return json({ error: "Admin key required." }, 401);
+    const id = clean(input.id, 80), items = await readItems(context.env.DEADLINES), item = items.find(entry => entry.id === id);
+    if (!item) return json({ error: "Deliverable not found." }, 404);
+    const title = clean(input.title, 140), description = clean(input.description, 1200), deadline = clean(input.deadline, 10);
+    if (!title || !description || !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) return json({ error: "Complete the title, brief description, and deadline." }, 400);
+    Object.assign(item, { title, description, deadline, updatedAt: new Date().toISOString() });
+    await context.env.DEADLINES.put(DATA_KEY, JSON.stringify(items));
+    return json({ ok: true, item });
+  }
+
   if (clean(input.company, 100)) return json({ ok: true });
   const submittedBy = clean(input.submittedBy, 60);
   const people = await readPeople(context.env.DEADLINES);
