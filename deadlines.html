@@ -30,9 +30,9 @@
       <button id="themeToggle" type="button">Dark mode</button>
     </div>
     <section class="card">
-      <p class="intro">Fred and Ayan can use this page to send a deadline update. Showmita will see it in the tracker and receive an email notification.</p>
+      <p class="intro">Use this page to send a deliverable and deadline update. Showmita will see it in the CortexGrip tracker.</p>
       <form id="deadlineForm">
-        <div class="field"><label for="submittedBy">Who is submitting?</label><select id="submittedBy" name="submittedBy" required><option value="">Select your name</option><option value="Fred">Fred</option><option value="Ayan">Ayan</option></select></div>
+        <div class="field"><label for="submittedBy">Who is submitting?</label><select id="submittedBy" name="submittedBy" required><option value="">Loading people...</option></select></div>
         <div class="field"><label for="title">Title</label><input id="title" name="title" maxlength="140" required placeholder="What is this deadline for?"></div>
         <div class="field"><label for="description">Brief description</label><textarea id="description" name="description" maxlength="1200" required placeholder="Add the context Showmita needs..."></textarea></div>
         <div class="field"><label for="deadline">Deadline</label><input id="deadline" name="deadline" type="date" required></div>
@@ -46,10 +46,11 @@
   <script>
     (function(){
       "use strict";
-      const root=document.documentElement,themeButton=document.getElementById("themeToggle"),form=document.getElementById("deadlineForm"),status=document.getElementById("formStatus"),submitButton=document.getElementById("submitButton");
+      const root=document.documentElement,themeButton=document.getElementById("themeToggle"),form=document.getElementById("deadlineForm"),status=document.getElementById("formStatus"),submitButton=document.getElementById("submitButton"),submittedBy=document.getElementById("submittedBy");
       function theme(){return root.dataset.theme==="dark"?"dark":"light"}
       function updateThemeButton(){themeButton.textContent=theme()==="dark"?"Light mode":"Dark mode"}
       themeButton.onclick=function(){const next=theme()==="dark"?"light":"dark";root.dataset.theme=next;try{localStorage.setItem("cortexGripTheme",next)}catch(e){}updateThemeButton()};updateThemeButton();
+      async function loadPeople(){try{const response=await fetch("/api/deadlines?view=people",{headers:{Accept:"application/json"}}),payload=await response.json();if(!response.ok)throw new Error();submittedBy.innerHTML='<option value="">Select your name</option>'+payload.people.map(name=>'<option value="'+String(name).replaceAll('&','&amp;').replaceAll('"','&quot;')+'">'+String(name).replaceAll('&','&amp;').replaceAll('<','&lt;')+'</option>').join('')}catch(e){submittedBy.innerHTML='<option value="">People list unavailable</option>';status.className="status show error";status.textContent="The people list is unavailable. Please try again later."}}loadPeople();
       form.addEventListener("submit",async function(event){
         event.preventDefault();status.className="status";status.textContent="";
         const values=Object.fromEntries(new FormData(form).entries());
