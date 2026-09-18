@@ -1,0 +1,69 @@
+const DATA_KEY = "deadline-submissions-v1";
+const PEOPLE_KEY = "deadline-people-v1";
+const DEFAULT_PEOPLE = ["Fred", "Ayan"];
+
+function json(body, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
+}
+
+function clean(value, maxLength) {
+  return String(value || "").trim().slice(0, maxLength);
+}
+
+async function readItems(namespace) {
+  const stored = await namespace.get(DATA_KEY, "json");
+  return Array.isArray(stored) ? stored : [];
+}
+
+async function readPeople(namespace) {
+  const stored = await namespace.get(PEOPLE_KEY, "json");
+  return Array.isArray(stored) && stored.length ? stored : DEFAULT_PEOPLE;
+}
+
+export async function onRequestGet(context) {
+  if (!context.env.DEADLINES) return json({ error: "Storage binding is not configured." }, 503);
+  const url = new URL(context.request.url);
+  if (url.searchParams.get("view") === "people") return json({ people: await readPeople(context.env.DEADLINES) });
+  const items = await readItems(context.env.DEADLINES);
+  return json({ items });
+}
+
+export async function onRequestPost(context) {
+  if (!context.env.DEADLINES) return json({ error: "Storage binding is not configured." }, 503);
+  let input;
+  try {
+    input = await context.request.json();
+  } catch {
+    return json({ error: "Invalid submission." }, 400);
+  }
+
+  if (input.action === "setPeople") {
+    const people = [...new Set((Array.isArray(input.people) ? input.people : []).map(name => clean(name, 60)).filter(Boolean))].slice(0, 100);
+    if (!people.length) return json({ error: "Add at least one person." }, 400);
+    await context.env.DEADLINES.put(PEOPLE_KEY, JSON.stringify(people));
+    return json({ ok: true, people });
+  }
+
+  if (clean(input.company, 100)) return json({ ok: true });
+  const submittedBy = clean(input.submittedBy, 60);
+  const title = clean(input.title, 140);
+  const description = clean(input.description, 1200);
+  const deadline = clean(input.deadline, 10);
+  const people = await readPeople(context.env.DEADLINES);
+  if (!people.includes(submittedBy)) return json({ error: "Choose your name from the list." }, 400);
+  if (!title || !description || !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) return json({ error: "Complete the title, brief description, and deadline." }, 400);
+
+  const item = { id: crypto.randomUUID(), submittedBy, title, description, deadline, submittedAt: new Date().toISOString() };
+  const items = await readItems(context.env.DEADLINES);
+  items.unshift(item);
+  await context.env.DEADLINES.put(DATA_KEY, JSON.stringify(items.slice(0, 500)));
+
+  return json({ ok: true }, 201);
+}
