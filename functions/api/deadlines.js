@@ -45,16 +45,39 @@ export async function onRequestGet(context) {
   if (!context.env.DEADLINES) return json({ error: "Storage binding is not configured." }, 503);
   const url = new URL(context.request.url);
   if (url.searchParams.get("view") === "people") return json({ people: await readPeople(context.env.DEADLINES) });
-  if (url.searchParams.get("view") === "archive") {
+  const view = url.searchParams.get("view");
+  if (view === "archive" || view === "archiveCsv") {
     if (!isAdmin(context)) return json({ error: "Admin key required." }, 401);
     const db = await archiveDb(context);
     if (!db) return json({ error: "Archive database binding is not configured." }, 503);
     const records = await db.prepare("SELECT payload FROM deadline_archive ORDER BY archived_at DESC").all();
-    return json({ items: records.results.map(row => JSON.parse(row.payload)) });
+    const items = records.results.map(row => JSON.parse(row.payload));
+    if (view === "archive") return json({ items });
+    const columns = ["id", "submittedBy", "title", "description", "deadline", "submittedAt", "completedAt", "updatedAt"];
+    const labels = ["ID", "Submitted By", "Deliverable", "Description", "Deadline", "Submitted At", "Completed At", "Last Updated At"];
+    const cell = value => {
+      let text = String(value ?? "");
+      if (/^[\s]*[=+\-@]/.test(text)) text = "'" + text;
+      return '"' + text.replaceAll('"', '""') + '"';
+    };
+    const csv = [labels, ...items.map(item => columns.map(key => item[key] ?? ""))].map(row => row.map(cell).join(",")).join("\r\n");
+    return new Response("\uFEFF" + csv, { headers: {
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": "attachment; filename=\"cortexgrip-completed-deadlines.csv\"",
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
+    } });
   }
   const items = await readItems(context.env.DEADLINES);
   const db = await archiveDb(context);
   if (!db) return json({ items });
+  const completed = items.filter(item => item.done);
+  for (const item of completed) {
+    await db.prepare("INSERT OR IGNORE INTO deadline_archive (id, payload, archived_at) VALUES (?, ?, ?)").bind(
+      item.id, JSON.stringify(item), item.completedAt || new Date().toISOString()
+    ).run();
+  }
+  if (completed.length) await context.env.DEADLINES.put(DATA_KEY, JSON.stringify(items.filter(item => !item.done)));
   const archived = await db.prepare("SELECT id FROM deadline_archive").all();
   const archivedIds = new Set(archived.results.map(row => row.id));
   return json({ items: items.filter(item => !archivedIds.has(item.id) && !item.done) });
