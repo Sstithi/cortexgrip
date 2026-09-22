@@ -513,8 +513,8 @@ Will have meeting tomorrow</span></div><div class="subtasks-mini"><span class="l
 <section id="deadlineUpdatesView" class="view">
   <div class="panel">
     <div class="diagram-toolbar">
-      <div><strong>Deliverable and deadline updates</strong><div class="note">People added under Meeting Notes can submit through the separate public page.</div></div>
-      <div class="row"><a href="deadlines.html" target="_blank" rel="noopener"><button type="button">Open public form</button></a><button id="refreshDeadlineUpdates" class="primary" type="button">Refresh updates</button></div>
+      <div><strong>Deliverable and deadline updates</strong><div class="note">People added under Meeting Notes can submit through the separate public page. Completed updates move to the archive. Download the completed CSV and import it into your OneDrive Excel workbook.</div></div>
+      <div class="row"><a href="deadlines.html" target="_blank" rel="noopener"><button type="button">Open public form</button></a><button id="refreshDeadlineUpdates" class="primary" type="button">Refresh updates</button><button id="downloadDeadlineArchive" type="button">Download completed CSV</button></div>
     </div>
   </div>
   <div id="deadlineUpdatesStatus" class="meeting-empty">Loading deadline updates...</div>
@@ -724,7 +724,7 @@ async function renderDeadlineUpdates(){
     const payload=await response.json(),items=Array.isArray(payload.items)?payload.items:[];
     if(!items.length){status.textContent="No deadline updates have been submitted yet.";return}
     status.style.display="none";
-    list.innerHTML=items.map(item=>'<article class="deadline-submission '+(item.done?'is-done':'')+'" data-deadline-item="'+esc(item.id)+'"><div><input data-deadline-edit="title" value="'+esc(item.title||"")+'"><div class="deadline-submission-meta">Submitted by '+esc(item.submittedBy||"Unknown")+' · '+esc(formatMeetingDateTime(item.submittedAt))+'</div></div><textarea data-deadline-edit="description">'+esc(item.description||"")+'</textarea><div class="deadline-submission-actions"><label class="deadline-submission-meta">Deadline</label><input type="date" data-deadline-edit="deadline" value="'+esc(item.deadline||"")+'"><label class="deadline-done"><input type="checkbox" data-deadline-edit="done" '+(item.done?'checked':'')+'> Done</label><button type="button" class="primary" data-save-deadline>Save changes</button><span class="deadline-submission-meta" data-save-status>'+(item.done?'Removes automatically 14 days after completion':'')+'</span></div></article>').join("");
+    list.innerHTML=items.map(item=>'<article class="deadline-submission '+(item.done?'is-done':'')+'" data-deadline-item="'+esc(item.id)+'"><div><input data-deadline-edit="title" value="'+esc(item.title||"")+'"><div class="deadline-submission-meta">Submitted by '+esc(item.submittedBy||"Unknown")+' · '+esc(formatMeetingDateTime(item.submittedAt))+'</div></div><textarea data-deadline-edit="description">'+esc(item.description||"")+'</textarea><div class="deadline-submission-actions"><label class="deadline-submission-meta">Deadline</label><input type="date" data-deadline-edit="deadline" value="'+esc(item.deadline||"")+'"><label class="deadline-done"><input type="checkbox" data-deadline-edit="done" '+(item.done?'checked':'')+'> Done</label><button type="button" class="primary" data-save-deadline>Save changes</button><span class="deadline-submission-meta" data-save-status>'+''+'</span></div></article>').join("");
   }catch(e){status.textContent="Deadline updates are unavailable until the Cloudflare storage binding is configured."}
 }
 function renderAll(){migrate();renderProducts();renderTasks();renderDiagram();renderCalendar();renderMeetings();updateThemeButton();renderDeadlineUpdates()}
@@ -797,7 +797,39 @@ document.getElementById('meetingNotesList').addEventListener('input',e=>{const x
 document.getElementById('meetingNotesList').onclick=e=>{const b=e.target.closest('[data-del-meeting-note]');if(b)deleteMeetingNote(b.dataset.delMeetingNote)};
 document.getElementById('themeToggle').onclick=toggleTheme;
 document.getElementById('refreshDeadlineUpdates').onclick=renderDeadlineUpdates;
-document.getElementById('deadlineUpdatesList').onclick=async e=>{const button=e.target.closest('[data-save-deadline]');if(!button)return;let adminKey=sessionStorage.getItem('cortexGripAdminKey');if(!adminKey){adminKey=prompt('Enter your private CortexGrip admin key');if(!adminKey)return;sessionStorage.setItem('cortexGripAdminKey',adminKey)}const card=button.closest('[data-deadline-item]'),status=card.querySelector('[data-save-status]'),values={action:'updateItem',id:card.dataset.deadlineItem};card.querySelectorAll('[data-deadline-edit]').forEach(x=>values[x.dataset.deadlineEdit]=x.type==='checkbox'?x.checked:x.value);button.disabled=true;status.textContent='Saving...';try{const response=await fetch('/api/deadlines',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminKey},body:JSON.stringify(values)}),payload=await response.json();if(!response.ok){if(response.status===401)sessionStorage.removeItem('cortexGripAdminKey');throw new Error(payload.error||'Unable to save')}status.textContent=values.done?'Saved · removes automatically in 14 days':'Saved';card.classList.toggle('is-done',values.done)}catch(error){status.textContent=error.message}finally{button.disabled=false}};
+function deadlineAdminKey(){
+ let key=sessionStorage.getItem("cortexGripTrackerKey")||sessionStorage.getItem("cortexGripAdminKey");
+ if(!key){key=prompt("Enter your private CortexGrip tracker key");if(key)sessionStorage.setItem("cortexGripAdminKey",key)}
+ return key;
+}
+document.getElementById("downloadDeadlineArchive").onclick=async()=>{
+ const key=deadlineAdminKey();if(!key)return;
+ const button=document.getElementById("downloadDeadlineArchive");button.disabled=true;
+ try{
+  const response=await fetch("/api/deadlines?view=archiveCsv",{headers:{Authorization:"Bearer "+key},cache:"no-store"});
+  if(!response.ok){const payload=await response.json().catch(()=>({}));throw new Error(payload.error||"Archive download failed")}
+  const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download="cortexgrip-completed-deadlines.csv";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }catch(error){alert(error.message)}finally{button.disabled=false}
+};
+document.getElementById("deadlineUpdatesList").onclick=async e=>{
+ const button=e.target.closest("[data-save-deadline]");if(!button)return;
+ const key=deadlineAdminKey();if(!key)return;
+ const card=button.closest("[data-deadline-item"),status=card.querySelector("[data-save-status]");
+ const values={id:card.dataset.deadlineItem};
+ card.querySelectorAll("[data-deadline-edit]").forEach(x=>values[x.dataset.deadlineEdit]=x.type==="checkbox"?x.checked:x.value);
+ if(values.done&&!confirm("Mark this deliverable done? It will move to the completed archive and disappear from the dashboard. Download the completed CSV to update your OneDrive Excel workbook."))return;
+ values.action=values.done?"archiveItem":"updateItem";
+ button.disabled=true;status.textContent=values.done?"Archiving...":"Saving...";
+ try{
+  const response=await fetch("/api/deadlines",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify(values)});
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(payload.error||"Unable to save");
+  if(values.done){card.remove();const list=document.getElementById("deadlineUpdatesList");if(!list.children.length){const info=document.getElementById("deadlineUpdatesStatus");info.style.display="block";info.textContent="No deadline updates have been submitted yet."}}
+  else status.textContent="Saved";
+ }catch(error){status.textContent=error.message;card.querySelector('[data-deadline-edit="done"]').checked=false}
+ finally{button.disabled=false}
+};
 connectCloud();
 })();
 </script>
