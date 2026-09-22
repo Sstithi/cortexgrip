@@ -513,17 +513,17 @@ Will have meeting tomorrow</span></div><div class="subtasks-mini"><span class="l
 <section id="deadlineUpdatesView" class="view">
   <div class="panel">
     <div class="diagram-toolbar">
-      <div><strong>Deliverable and deadline updates</strong><div class="note">People added under Meeting Notes can submit through the separate public page. Completed updates move to the archive. Download the completed CSV and import it into your OneDrive Excel workbook.</div></div>
-      <div class="row"><a href="deadlines.html" target="_blank" rel="noopener"><button type="button">Open public form</button></a><button id="refreshDeadlineUpdates" class="primary" type="button">Refresh updates</button><button id="downloadDeadlineArchive" type="button">Download completed CSV</button></div>
+      <div><strong>Deliverable and deadline updates</strong><div class="note">People added under Meeting Notes can submit through the separate public page. Completed updates move to the archive. Completed updates are saved to the connected Google Sheet before leaving this dashboard. Use the CSV for an additional export.</div></div>
+      <div class="row"><a href="deadlines.html" target="_blank" rel="noopener"><button type="button">Open public form</button></a><button id="refreshDeadlineUpdates" class="primary" type="button">Refresh updates</button><button id="downloadDeadlineArchive" type="button">Download completed CSV</button><button id="testGoogleSheet" type="button">Test sheet connection</button></div>
     </div>
     <div class="row" style="margin-top:14px">
-      <label for="archiveWorkbookUrl">OneDrive Excel link</label>
-      <input id="archiveWorkbookUrl" type="url" inputmode="url" placeholder="Paste your OneDrive workbook link" style="min-width:250px;flex:1">
+      <label for="archiveWorkbookUrl">Google Sheet link</label>
+      <input id="archiveWorkbookUrl" type="url" inputmode="url" placeholder="Paste your Google Sheet link" style="min-width:250px;flex:1">
       <button id="saveArchiveWorkbookUrl" type="button">Save link</button>
-      <a id="openArchiveWorkbook" href="#" target="_blank" rel="noopener noreferrer" hidden><button type="button">Open workbook</button></a>
+      <a id="openArchiveWorkbook" href="#" target="_blank" rel="noopener noreferrer" hidden><button type="button">Open Google Sheet</button></a>
       <span id="archiveWorkbookStatus" class="sync-state" role="status"></span>
     </div>
-    <div class="note">The link opens your workbook. Download completed CSV to transfer archived records into it.</div>
+    <div class="note">The link opens the sheet. Test the connection before completing a deadline update.</div>
   </div>
   <div id="deadlineUpdatesStatus" class="meeting-empty">Loading deadline updates...</div>
   <div id="deadlineUpdatesList" class="deadline-submission-list"></div>
@@ -825,6 +825,18 @@ document.getElementById("saveArchiveWorkbookUrl").onclick=()=>{
  }
  data.archiveWorkbookUrl=value;save();renderArchiveWorkbookLink();status.textContent=value?"Link saved with tracker data.":"Link removed.";
 };
+document.getElementById("testGoogleSheet").onclick=async()=>{
+ const key=deadlineAdminKey();if(!key)return;
+ const button=document.getElementById("testGoogleSheet"),status=document.getElementById("archiveWorkbookStatus");
+ button.disabled=true;status.textContent="Checking Google Sheet…";
+ try{
+  const response=await fetch("/api/deadlines",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({action:"testGoogleSheet"})});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(result.error||"Could not connect to Google Sheet");
+  status.textContent="Connected to Google Sheet: "+result.sheet;
+ }catch(error){status.textContent="Not connected: "+error.message}
+ finally{button.disabled=false}
+};
 document.getElementById("downloadDeadlineArchive").onclick=async()=>{
  const key=deadlineAdminKey();if(!key)return;
  const button=document.getElementById("downloadDeadlineArchive");button.disabled=true;
@@ -841,14 +853,14 @@ document.getElementById("deadlineUpdatesList").onclick=async e=>{
  const card=button.closest("[data-deadline-item"),status=card.querySelector("[data-save-status]");
  const values={id:card.dataset.deadlineItem};
  card.querySelectorAll("[data-deadline-edit]").forEach(x=>values[x.dataset.deadlineEdit]=x.type==="checkbox"?x.checked:x.value);
- if(values.done&&!confirm("Mark this deliverable done? It will move to the completed archive and disappear from the dashboard. Download the completed CSV to update your OneDrive Excel workbook."))return;
+ if(values.done&&!confirm("Mark this deliverable done? It will be saved to the connected Google Sheet, then archived and removed from the dashboard."))return;
  values.action=values.done?"archiveItem":"updateItem";
  button.disabled=true;status.textContent=values.done?"Archiving...":"Saving...";
  try{
   const response=await fetch("/api/deadlines",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify(values)});
   const payload=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(payload.error||"Unable to save");
-  if(values.done){card.remove();const list=document.getElementById("deadlineUpdatesList");if(!list.children.length){const info=document.getElementById("deadlineUpdatesStatus");info.style.display="block";info.textContent="No deadline updates have been submitted yet."}}
+  if(values.done){card.remove();const info=document.getElementById("deadlineUpdatesStatus");info.style.display="block";info.textContent="Saved to Google Sheet and archived.";}
   else status.textContent="Saved";
  }catch(error){status.textContent=error.message;card.querySelector('[data-deadline-edit="done"]').checked=false}
  finally{button.disabled=false}
