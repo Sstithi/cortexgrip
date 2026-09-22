@@ -55,6 +55,7 @@
   --info:#7DA9F5;--info-wash:rgba(125,169,245,.12);--good:#4ADE80;--warn:#FBBF24;--bad:#FB7185;
   --shadow-xs:0 1px 2px rgba(0,0,0,.35);--shadow-sm:0 2px 8px rgba(0,0,0,.38);--shadow-md:0 4px 18px rgba(0,0,0,.44);
 }
+*[hidden]{display:none!important}
 *{box-sizing:border-box}
 body{
   margin:0;font-family:var(--font);font-size:14px;line-height:1.5;
@@ -429,7 +430,7 @@ body.presenting .owner-label,body.presenting .label{font-size:11.5px}
 
 </style>
 </head>
-<body>
+<body><div id="cloudGate" style="position:fixed;inset:0;z-index:200;background:var(--background);display:grid;place-items:center;padding:20px"><div class="panel" style="max-width:550px;width:100%;margin:0"><strong>Connect CortexGrip tracker</strong><p id="cloudGateMessage" class="note">Connecting to shared storage…</p><div class="row" style="margin-top:14px"><button id="cloudRetry" class="primary" type="button">Connect</button><button id="cloudImport" type="button" hidden>Import browser data</button><button id="cloudBackup" type="button" hidden>Download unsaved backup</button></div></div></div>
 <button id="exitPresent" title="Exit presentation (Esc)">Exit presentation</button>
 <script id="snapshotData" type="application/json">{"products": ["AI Website Builder", "Customer Portal", "Marketing Website", "Email", "ICANN & TLD Reg", "Digital Marketing"], "tasks": [{"id": "t_import_0", "name": "AI Website Builder Tool", "status": "In Progress", "product": "AI Website Builder", "owner": "Frederick", "nextUpdateDeadline": "", "deadline": "2026-09-21", "comment": "Holding on the team, \nWill have meeting tomorrow", "done": false, "subtasks": [{"id": "s_import_0_0", "title": "Website transfer (By code/url)", "status": "In Progress", "deadline": "", "comment": ""}, {"id": "s_import_0_1", "title": "Hidden Pages Alert", "status": "Not Started", "deadline": "", "comment": ""}, {"id": "s_import_0_2", "title": "Visual AI model", "status": "Not Started", "deadline": "", "comment": ""}, {"id": "s_import_0_3", "title": "Improvement of website outcome", "status": "Not Started", "deadline": "", "comment": ""}, {"id": "s_import_0_4", "title": "Knowledge Base and Guard creation", "status": "Not Started", "deadline": "", "comment": ""}, {"id": "s_import_0_5", "title": "Improvement of the conversation layout and the editing layout", "status": "Not Started", "deadline": "", "comment": ""}]}, {"id": "t_import_1", "name": "Customer Portal Implementation", "status": "In Progress", "product": "Customer Portal", "owner": "Frederick", "nextUpdateDeadline": "2026-09-18", "deadline": "Awaiting deadline", "comment": "Holding on the team, \nWill have meeting tomorrow", "done": false, "subtasks": [{"id": "s_import_1_0", "title": "Domain Search Engine with suggestion", "status": "Not Started", "deadline": "", "comment": ""}, {"id": "s_import_1_1", "title": "Payment Gateway Integration", "status": "Not Started", "deadline": "", "comment": ""}]}, {"id": "t_import_2", "name": "Customer Portal Design", "status": "In Progress", "product": "Customer Portal", "owner": "Frederick", "nextUpdateDeadline": "2026-09-18", "deadline": "Awaiting deadline", "comment": "Holding on the team, \nWill have meeting tomorrow", "done": false, "subtasks": []}, {"id": "t_import_3", "name": "Marketing Website Design", "status": "In Progress", "product": "Marketing Website", "owner": "Frederick", "nextUpdateDeadline": "2026-09-18", "deadline": "Awaiting deadline", "comment": "Holding on the team , will update today", "done": false, "subtasks": []}, {"id": "t_import_4", "name": "Email Service & Client", "status": "Planning", "product": "Email", "owner": "Ayan", "nextUpdateDeadline": "2026-09-27", "deadline": "Awaiting deadline", "comment": "", "done": false, "subtasks": [{"id": "s_import_4_0", "title": "Email UI Finalization", "status": "Planning", "deadline": "", "comment": ""}, {"id": "s_import_4_1", "title": "Email Service Imeplementation", "status": "Planning", "deadline": "", "comment": ""}]}, {"id": "t_import_5", "name": "ICANN Registration", "status": "Post Completion Process", "product": "ICANN & TLD Reg", "owner": "Showmita Saha", "nextUpdateDeadline": "2026-09-18", "deadline": "2026-10-01", "comment": "", "done": false, "subtasks": []}, {"id": "t_import_6", "name": "Nominate Registration", "status": "On Hold", "product": "ICANN & TLD Reg", "owner": "Showmita Saha", "nextUpdateDeadline": "Awaiting deadline", "deadline": "2026-10-12", "comment": "Nick is not available, require insurance confirmation", "done": false, "subtasks": []}, {"id": "t_import_7", "name": "Registrar solution onboarding", "status": "In Progress", "product": "ICANN & TLD Reg", "owner": "Ayan", "nextUpdateDeadline": "2026-09-18", "deadline": "2026-09-30", "comment": "Meeting on 18/09/2026", "done": false, "subtasks": []}, {"id": "t_import_8", "name": "Versign & other registry  onoboaring", "status": "Not Started", "product": "ICANN & TLD Reg", "owner": "Ayan", "nextUpdateDeadline": "2026-09-22", "deadline": "2026-10-15", "comment": "Dependent on Registrar solution & Payments", "done": false, "subtasks": []}, {"id": "t_import_9", "name": "Posting on Social Media (FB, IG, LinkedIN, Tikton )", "status": "In Progress", "product": "Digital Marketing", "owner": "Harshil", "nextUpdateDeadline": "", "deadline": "Ongoing — No Fixed End Date", "comment": "", "done": false, "subtasks": []}], "diagramTaskOrder": ["t_import_0", "t_import_1", "t_import_2", "t_import_3", "t_import_4", "t_import_5", "t_import_6", "t_import_7", "t_import_8", "t_import_9"]}</script>
 <div class="wrap">
@@ -437,7 +438,7 @@ body.presenting .owner-label,body.presenting .label{font-size:11.5px}
 <div class="brand"><span class="logo"></span><div><div class="brand-name">CortexGrip</div><div class="sub">Product / Process tracker, block diagram and deadline calendar</div></div></div>
 <div class="export-grid">
 <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch colour theme">Dark mode</button>
-<button id="syncViews" class="primary sync">Update Diagram &amp; Calendar</button>
+<button id="syncViews" class="primary sync">Update Diagram &amp; Calendar</button><span id="cloudStatus" class="sync-state" role="status">Connecting…</span>
 <details class="dl-menu" id="dlMenu">
 <summary title="Downloads" aria-label="Download options"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><svg class="dl-caret" width="10" height="7" viewBox="0 0 10 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 1.2 5 5.2 9 1.2"/></svg></summary>
 <div class="dl-pop">
@@ -526,7 +527,8 @@ Will have meeting tomorrow</span></div><div class="subtasks-mini"><span class="l
 const STORE="cortexGripFullTracker_v3";
 const statuses=["Planning","Not Started","In Progress","Blocked","On Hold","Complete","Post Completion Process"];
 const embedded=JSON.parse(document.getElementById("snapshotData").textContent);
-let data=load(),calDate=new Date(2026,8,1),viewsDirty=false,expandedSubtasks=new Set(),dragProduct=null;
+let data=JSON.parse(JSON.stringify(embedded)),calDate=new Date(2026,8,1),viewsDirty=false,expandedSubtasks=new Set(),dragProduct=null;
+let cloudKey=sessionStorage.getItem("cortexGripTrackerKey")||"",cloudVersion=0,cloudReady=false,cloudDirty=false,cloudSaving=false,cloudBlocked=false;
 function migrate(){
   data.tasks.forEach(t=>{if(!Array.isArray(t.subtasks))t.subtasks=[];if(t.nextUpdateDeadline==null)t.nextUpdateDeadline="";if(t.deadline==="Not confirmed yet")t.deadline="Awaiting deadline";if(t.nextUpdateDeadline==="Not confirmed yet")t.nextUpdateDeadline="Awaiting deadline"});
   if(!Array.isArray(data.meetingPeople))data.meetingPeople=[];
@@ -536,8 +538,46 @@ function migrate(){
   data.diagramTaskOrder=data.diagramTaskOrder.filter(id=>ids.has(id));
   data.tasks.forEach(t=>{if(!data.diagramTaskOrder.includes(t.id))data.diagramTaskOrder.push(t.id)});
 }
-function load(){try{const raw=localStorage.getItem(STORE);if(raw){const p=JSON.parse(raw);if(Array.isArray(p.products)&&Array.isArray(p.tasks))return p}}catch(e){}return JSON.parse(JSON.stringify(embedded))}
-function save(){localStorage.setItem(STORE,JSON.stringify(data))}
+function readOldBrowserData(){try{const raw=localStorage.getItem(STORE);if(raw){const p=JSON.parse(raw);if(Array.isArray(p.products)&&Array.isArray(p.tasks))return p}}catch(e){}return JSON.parse(JSON.stringify(embedded))}
+function cloudMessage(message){document.getElementById("cloudStatus").textContent=message}
+function showGate(message,importAllowed=false,backupAllowed=false){
+ document.getElementById("cloudGate").style.display="grid";document.getElementById("cloudGateMessage").textContent=message;
+ document.getElementById("cloudImport").hidden=!importAllowed;document.getElementById("cloudBackup").hidden=!backupAllowed;
+}
+function hideGate(){document.getElementById("cloudGate").style.display="none"}
+async function cloudRequest(method,body){
+ const response=await fetch("/api/tracker",{method,headers:{"Authorization":"Bearer "+cloudKey,"Content-Type":"application/json","Accept":"application/json"},body:body?JSON.stringify(body):undefined,cache:"no-store"});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok)throw Object.assign(new Error(result.error||"Cloud request failed ("+response.status+")."),{status:response.status});
+ return result;
+}
+async function connectCloud(){
+ if(!cloudKey){cloudKey=prompt("Enter your private CortexGrip tracker key")||"";if(!cloudKey){showGate("Enter the tracker key to load your shared data.");return}}
+ try{
+  const result=await cloudRequest("GET");
+  sessionStorage.setItem("cortexGripTrackerKey",cloudKey);cloudVersion=result.version;
+  if(!result.data){cloudReady=false;showGate("The shared database is empty. Import once from the browser with your latest edits.",true);cloudMessage("Import needed");return}
+  data=result.data;cloudReady=true;cloudDirty=false;cloudBlocked=false;renderAll();hideGate();cloudMessage("Saved in cloud");
+ }catch(e){if(e.status===401){cloudKey="";sessionStorage.removeItem("cortexGripTrackerKey")}showGate(e.message+" Check the database binding and tracker key, then connect again.");cloudMessage("Cloud unavailable")}
+}
+async function importBrowserData(){
+ const candidate=readOldBrowserData();
+ if(!confirm("Import "+candidate.tasks.length+" tasks and browser data into the empty shared database? Use the browser with your latest edits."))return;
+ data=candidate;migrate();
+ try{const result=await cloudRequest("PUT",{version:0,data});cloudVersion=result.version;cloudReady=true;cloudDirty=false;cloudBlocked=false;renderAll();hideGate();cloudMessage("Saved in cloud")}
+ catch(e){showGate("Import failed: "+e.message+". Your browser data is still available.",true)}
+}
+function save(){if(!cloudReady||cloudBlocked)return;cloudDirty=true;cloudMessage("Saving…");flushCloud()}
+async function flushCloud(){
+ if(cloudSaving||!cloudReady||cloudBlocked)return;cloudSaving=true;
+ try{while(cloudDirty){cloudDirty=false;const snapshot=JSON.parse(JSON.stringify(data));const result=await cloudRequest("PUT",{version:cloudVersion,data:snapshot});cloudVersion=result.version}cloudMessage("Saved in cloud")}
+ catch(e){cloudDirty=true;cloudBlocked=true;cloudMessage("Unsaved changes");showGate(e.status===409?"The tracker changed elsewhere. Download your unsaved changes before reloading.":"Save failed: "+e.message+". Download your unsaved changes or retry.",false,true)}
+ finally{cloudSaving=false}
+}
+window.addEventListener("beforeunload",e=>{if(cloudDirty||cloudSaving){e.preventDefault();e.returnValue=""}});
+document.getElementById("cloudRetry").onclick=()=>{if(cloudBlocked&&cloudDirty){if(!confirm("Reloading discards unsaved edits on this page. Download a backup first if needed."))return;location.reload();return}connectCloud()};
+document.getElementById("cloudImport").onclick=importBrowserData;
+document.getElementById("cloudBackup").onclick=()=>downloadBlob("cortexgrip-unsaved-backup.json",JSON.stringify(data,null,2),"application/json");
 function uid(prefix="t"){return prefix+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
 function isDate(v){return /^\d{4}-\d{2}-\d{2}$/.test(v||"")}
@@ -758,7 +798,7 @@ document.getElementById('meetingNotesList').onclick=e=>{const b=e.target.closest
 document.getElementById('themeToggle').onclick=toggleTheme;
 document.getElementById('refreshDeadlineUpdates').onclick=renderDeadlineUpdates;
 document.getElementById('deadlineUpdatesList').onclick=async e=>{const button=e.target.closest('[data-save-deadline]');if(!button)return;let adminKey=sessionStorage.getItem('cortexGripAdminKey');if(!adminKey){adminKey=prompt('Enter your private CortexGrip admin key');if(!adminKey)return;sessionStorage.setItem('cortexGripAdminKey',adminKey)}const card=button.closest('[data-deadline-item]'),status=card.querySelector('[data-save-status]'),values={action:'updateItem',id:card.dataset.deadlineItem};card.querySelectorAll('[data-deadline-edit]').forEach(x=>values[x.dataset.deadlineEdit]=x.type==='checkbox'?x.checked:x.value);button.disabled=true;status.textContent='Saving...';try{const response=await fetch('/api/deadlines',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminKey},body:JSON.stringify(values)}),payload=await response.json();if(!response.ok){if(response.status===401)sessionStorage.removeItem('cortexGripAdminKey');throw new Error(payload.error||'Unable to save')}status.textContent=values.done?'Saved · removes automatically in 14 days':'Saved';card.classList.toggle('is-done',values.done)}catch(error){status.textContent=error.message}finally{button.disabled=false}};
-renderAll();
+connectCloud();
 })();
 </script>
 
