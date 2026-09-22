@@ -516,6 +516,14 @@ Will have meeting tomorrow</span></div><div class="subtasks-mini"><span class="l
       <div><strong>Deliverable and deadline updates</strong><div class="note">People added under Meeting Notes can submit through the separate public page. Completed updates move to the archive. Download the completed CSV and import it into your OneDrive Excel workbook.</div></div>
       <div class="row"><a href="deadlines.html" target="_blank" rel="noopener"><button type="button">Open public form</button></a><button id="refreshDeadlineUpdates" class="primary" type="button">Refresh updates</button><button id="downloadDeadlineArchive" type="button">Download completed CSV</button></div>
     </div>
+    <div class="row" style="margin-top:14px">
+      <label for="archiveWorkbookUrl">OneDrive Excel link</label>
+      <input id="archiveWorkbookUrl" type="url" inputmode="url" placeholder="Paste your OneDrive workbook link" style="min-width:250px;flex:1">
+      <button id="saveArchiveWorkbookUrl" type="button">Save link</button>
+      <a id="openArchiveWorkbook" href="#" target="_blank" rel="noopener noreferrer" hidden><button type="button">Open workbook</button></a>
+      <span id="archiveWorkbookStatus" class="sync-state" role="status"></span>
+    </div>
+    <div class="note">The link opens your workbook. Download completed CSV to transfer archived records into it.</div>
   </div>
   <div id="deadlineUpdatesStatus" class="meeting-empty">Loading deadline updates...</div>
   <div id="deadlineUpdatesList" class="deadline-submission-list"></div>
@@ -532,6 +540,7 @@ let cloudKey=sessionStorage.getItem("cortexGripTrackerKey")||"",cloudVersion=0,c
 function migrate(){
   data.tasks.forEach(t=>{if(!Array.isArray(t.subtasks))t.subtasks=[];if(t.nextUpdateDeadline==null)t.nextUpdateDeadline="";if(t.deadline==="Not confirmed yet")t.deadline="Awaiting deadline";if(t.nextUpdateDeadline==="Not confirmed yet")t.nextUpdateDeadline="Awaiting deadline"});
   if(!Array.isArray(data.meetingPeople))data.meetingPeople=[];
+  if(typeof data.archiveWorkbookUrl!=="string")data.archiveWorkbookUrl="";
   if(!Array.isArray(data.meetingNotes))data.meetingNotes=[];
   if(!Array.isArray(data.diagramTaskOrder))data.diagramTaskOrder=data.tasks.map(t=>t.id);
   const ids=new Set(data.tasks.map(t=>t.id));
@@ -727,7 +736,13 @@ async function renderDeadlineUpdates(){
     list.innerHTML=items.map(item=>'<article class="deadline-submission '+(item.done?'is-done':'')+'" data-deadline-item="'+esc(item.id)+'"><div><input data-deadline-edit="title" value="'+esc(item.title||"")+'"><div class="deadline-submission-meta">Submitted by '+esc(item.submittedBy||"Unknown")+' · '+esc(formatMeetingDateTime(item.submittedAt))+'</div></div><textarea data-deadline-edit="description">'+esc(item.description||"")+'</textarea><div class="deadline-submission-actions"><label class="deadline-submission-meta">Deadline</label><input type="date" data-deadline-edit="deadline" value="'+esc(item.deadline||"")+'"><label class="deadline-done"><input type="checkbox" data-deadline-edit="done" '+(item.done?'checked':'')+'> Done</label><button type="button" class="primary" data-save-deadline>Save changes</button><span class="deadline-submission-meta" data-save-status>'+''+'</span></div></article>').join("");
   }catch(e){status.textContent="Deadline updates are unavailable until the Cloudflare storage binding is configured."}
 }
-function renderAll(){migrate();renderProducts();renderTasks();renderDiagram();renderCalendar();renderMeetings();updateThemeButton();renderDeadlineUpdates()}
+function renderArchiveWorkbookLink(){
+ const input=document.getElementById("archiveWorkbookUrl"),link=document.getElementById("openArchiveWorkbook");
+ input.value=data.archiveWorkbookUrl||"";
+ link.hidden=!data.archiveWorkbookUrl;
+ if(data.archiveWorkbookUrl)link.href=data.archiveWorkbookUrl;else link.removeAttribute("href");
+}
+function renderAll(){migrate();renderProducts();renderTasks();renderDiagram();renderCalendar();renderMeetings();updateThemeButton();renderArchiveWorkbookLink();renderDeadlineUpdates()}
 function downloadBlob(name,text,type="text/html;charset=utf-8"){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
 function exportCSV(){const rows=[["Task Name","Status","Product / Process","Responsible","Next Update Deadline","Finish Deadline","Completed","Subtask Count","Comment"],...data.tasks.map(t=>[t.name,t.status,t.product,t.owner,t.nextUpdateDeadline,t.deadline,t.done?"Yes":"No",(t.subtasks||[]).length,t.comment])];downloadBlob("cortexgrip-task-list.csv",rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\\n'),"text/csv;charset=utf-8")}
 function staticDiagramHtml(){
@@ -802,6 +817,14 @@ function deadlineAdminKey(){
  if(!key){key=prompt("Enter your private CortexGrip tracker key");if(key)sessionStorage.setItem("cortexGripAdminKey",key)}
  return key;
 }
+document.getElementById("saveArchiveWorkbookUrl").onclick=()=>{
+ const input=document.getElementById("archiveWorkbookUrl"),status=document.getElementById("archiveWorkbookStatus");
+ const value=input.value.trim();
+ if(value){
+  try{const url=new URL(value);if(url.protocol!=="https:")throw Error("Use a secure HTTPS link")}catch(e){status.textContent="Enter a valid HTTPS workbook URL.";return}
+ }
+ data.archiveWorkbookUrl=value;save();renderArchiveWorkbookLink();status.textContent=value?"Link saved with tracker data.":"Link removed.";
+};
 document.getElementById("downloadDeadlineArchive").onclick=async()=>{
  const key=deadlineAdminKey();if(!key)return;
  const button=document.getElementById("downloadDeadlineArchive");button.disabled=true;
