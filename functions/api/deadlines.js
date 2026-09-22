@@ -36,6 +36,18 @@ async function archiveDb(context) {
   return db;
 }
 
+async function googleSheetRequest(context, action, item) {
+ const target=context.env.GOOGLE_SHEETS_WEBHOOK_URL,key=context.env.GOOGLE_SHEETS_ARCHIVE_KEY;
+ if(!target||!key)throw new Error("Google Sheet connection is not configured.");
+ let url;try{url=new URL(target)}catch{throw new Error("Google Sheet connection URL is invalid.")}
+ if(url.protocol!=="https:"||url.hostname!=="script.google.com"||!url.pathname.startsWith("/macros/s/")||!url.pathname.endsWith("/exec"))throw new Error("Use a deployed Google Apps Script URL.");
+ const response=await fetch(url.toString(),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({key,action,item}),redirect:"follow"});
+ if(!response.ok)throw new Error("Google Sheet did not accept the request.");
+ const result=await response.json().catch(()=>null);
+ if(!result||result.ok!==true||(action==="archive"&&result.id!==item.id))throw new Error(result?.error||"Google Sheet did not confirm the saved row.");
+ return result;
+}
+
 async function readPeople(namespace) {
   const stored = await namespace.get(PEOPLE_KEY, "json");
   return Array.isArray(stored) && stored.length ? stored : DEFAULT_PEOPLE;
@@ -92,6 +104,12 @@ export async function onRequestPost(context) {
     return json({ error: "Invalid submission." }, 400);
   }
 
+  if (input.action === "testGoogleSheet") {
+    if (!isAdmin(context)) return json({ error: "Admin key required." }, 401);
+    try { const result=await googleSheetRequest(context,"ping");return json({ok:true,sheet:result.sheet}) }
+    catch(error){return json({error:error.message},503)}
+  }
+
   if (input.action === "setPeople") {
     const people = [...new Set((Array.isArray(input.people) ? input.people : []).map(name => clean(name, 60)).filter(Boolean))].slice(0, 100);
     if (!people.length) return json({ error: "Add at least one person." }, 400);
@@ -113,6 +131,8 @@ export async function onRequestPost(context) {
     if (!title || !description || !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) return json({ error: "Complete the title, brief description, and deadline." }, 400);
     const archivedAt = new Date().toISOString();
     const saved = { ...item, title, description, deadline, done: true, completedAt: archivedAt, updatedAt: archivedAt };
+    try { await googleSheetRequest(context,"archive",saved) }
+    catch(error){return json({error:error.message+" The item is still active."},503)}
     await db.prepare("INSERT OR IGNORE INTO deadline_archive (id, payload, archived_at) VALUES (?, ?, ?)").bind(id, JSON.stringify(saved), archivedAt).run();
     await context.env.DEADLINES.put(DATA_KEY, JSON.stringify(items.filter(entry => entry.id !== id)));
     return json({ ok: true, archived: true });
