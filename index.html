@@ -703,11 +703,18 @@ function reorderDiagramTask(fromId,toId){
   data.diagramTaskOrder.splice(newB,0,fromId);
   save();renderDiagram();
 }
-function openCommentHistory(taskId){
- const t=data.tasks.find(x=>x.id===taskId);if(!t)return;
- document.getElementById("commentHistoryTitle").textContent="Comment history · "+(t.name||"Untitled task");
- const rows=t.commentHistory||[],list=document.getElementById("commentHistoryList");
- list.innerHTML='<div class="history-entry"><b>Current comment</b><br>'+esc(t.comment||"No comment")+'</div>'+(rows.length?rows.map(h=>'<div class="history-entry"><b>'+esc(formatMeetingDateTime(h.changedAt))+'</b><br><span class="label">Previous</span>'+esc(h.from||"Blank")+'<br><span class="label" style="margin-top:6px">Changed to</span>'+esc(h.to||"Blank")+'</div>').join(""):'<div class="history-empty">No earlier comment changes have been recorded.</div>');
+function unifiedHistory(target){
+ const rows=[];
+ (target.commentHistory||[]).forEach(h=>rows.push({at:h.changedAt,text:"Comment: "+(h.from||"Blank")+" → "+(h.to||"Blank")}));
+ (target.dateHistory||[]).forEach(h=>rows.push({at:h.changedAt,text:(h.field==="nextUpdateDeadline"?"Next update":h.field==="deadline"?"Finish deadline":"Deadline")+": "+(h.from||"Blank")+" → "+(h.to||"Blank")+(h.comment?" · "+h.comment:"")}));
+ (target.manualHistory||[]).forEach(h=>rows.push({at:h.occurredAt||h.addedAt,text:h.note||""}));
+ return rows.sort((a,b)=>new Date(b.at)-new Date(a.at));
+}
+function openDiagramHistory(taskId,subId=""){
+ const t=data.tasks.find(x=>x.id===taskId);if(!t)return;const target=subId?(t.subtasks||[]).find(s=>s.id===subId):t;if(!target)return;
+ document.getElementById("commentHistoryTitle").textContent="History · "+(subId?(target.title||"Untitled subtask"):(t.name||"Untitled task"));
+ const rows=unifiedHistory(target),list=document.getElementById("commentHistoryList");
+ list.innerHTML='<div class="history-entry"><b>Current comment</b><br>'+esc(target.comment||"No comment")+'</div>'+(rows.length?rows.map(h=>'<div class="history-entry"><b>'+esc(formatMeetingDateTime(h.at))+'</b><br>'+esc(h.text||"")+'</div>').join(""):'<div class="history-empty">No history has been recorded.</div>');
  document.getElementById("commentHistoryModal").hidden=false;
 }
 function renderDiagram(){
@@ -722,12 +729,12 @@ function renderDiagram(){
       return '<div class="owner-branch"><div class="owner-box"><span class="owner-label">Responsible</span><strong>'+esc(owner)+'</strong></div><div class="owner-line"></div><div class="task-list">'+
       arr.map((t,ti)=>{
         const visibleSubs=(t.subtasks||[]).filter(s=>showHiddenDiagramItems||s.status==="Planning"||s.status==="In Progress"),hiddenCount=(t.subtasks||[]).length-visibleSubs.length;
-        const mini=visibleSubs.length||blockedCount?'<div class="subtasks-mini"><span class="label">Subtasks ('+visibleSubs.length+(hiddenCount&&!showHiddenDiagramItems?' shown · '+hiddenCount+' hidden':'')+')</span>'+visibleSubs.map(s=>'<div>• <b>'+esc(s.title||"Untitled subtask")+'</b> — '+esc(s.status)+(s.deadline?' · '+esc(isDate(s.deadline)?formatDisplayDate(s.deadline):s.deadline):'')+'</div>').join('')+'</div>':'';
+        const mini=visibleSubs.length||hiddenCount?'<div class="subtasks-mini"><span class="label">Subtasks ('+visibleSubs.length+(hiddenCount&&!showHiddenDiagramItems?' shown · '+hiddenCount+' hidden':'')+')</span>'+visibleSubs.map(s=>'<div>• <b>'+esc(s.title||"Untitled subtask")+'</b> — '+esc(s.status)+(s.deadline?' · '+esc(isDate(s.deadline)?formatDisplayDate(s.deadline):s.deadline):'')+' <button class="history-btn" type="button" data-history-task="'+t.id+'" data-history-sub="'+s.id+'" title="View history" aria-label="View subtask history">↺</button></div>').join('')+'</div>':'';
         return '<div class="task-card" draggable="true" data-diagram-task="'+t.id+'">'+
           '<div class="task-card-head"><div class="task-head-main"><div class="task-title">'+esc(t.name||"Untitled task")+'</div><span class="status-pill '+statusClass(t.status)+'">'+esc(t.status)+'</span></div>'+
           '<div class="task-reorder"><button data-move-task="'+t.id+'" data-task-dir="-1" '+(ti===0?'disabled':'')+'>↑</button><button data-move-task="'+t.id+'" data-task-dir="1" '+(ti===arr.length-1?'disabled':'')+'>↓</button></div></div>'+
           '<div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">'+esc(isDate(t.nextUpdateDeadline)?formatDisplayDate(t.nextUpdateDeadline):(t.nextUpdateDeadline||"No deadline"))+'</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">'+esc(isDate(t.deadline)?formatDisplayDate(t.deadline):(t.deadline||"No deadline"))+'</span></div></div>'+
-          '<div class="comment-box"><span class="label">Comments <button class="history-btn" type="button" data-comment-history="'+t.id+'" title="View comment history" aria-label="View comment history">↺</button></span><span class="value">'+esc(t.comment||"No comment").replaceAll("\\n","<br>")+'</span></div>'+mini+'</div></div>';
+          '<div class="comment-box"><span class="label">Comments <button class="history-btn" type="button" data-history-task="'+t.id+'" title="View history" aria-label="View task history">↺</button></span><span class="value">'+esc(t.comment||"No comment").replaceAll("\\n","<br>")+'</span></div>'+mini+'</div></div>';
       }).join('')+'</div></div>';
     }).join('');
     return '<section class="product-column" draggable="true" data-product="'+esc(product)+'"><div class="product-pill"><span>'+esc(product)+'</span><span class="reorder"><button data-move-product="'+esc(product)+'" data-dir="-1" '+(pi===0?'disabled':'')+'>◀</button><button data-move-product="'+esc(product)+'" data-dir="1" '+(pi===data.products.length-1?'disabled':'')+'>▶</button></span></div><div class="product-line"></div><div class="owner-list">'+ownerHtml+'</div></section>';
@@ -881,7 +888,7 @@ document.getElementById('taskBody').onclick=e=>{const addHistory=e.target.closes
 document.getElementById("closeCommentHistory").onclick=()=>document.getElementById("commentHistoryModal").hidden=true;
 document.getElementById("commentHistoryModal").onclick=e=>{if(e.target.id==="commentHistoryModal")e.currentTarget.hidden=true};
 document.addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("commentHistoryModal").hidden=true});
-document.getElementById('productsBoard').addEventListener('click',e=>{const history=e.target.closest('[data-comment-history]');if(history){openCommentHistory(history.dataset.commentHistory);return}const tb=e.target.closest('[data-move-task]');if(tb){moveDiagramTask(tb.dataset.moveTask,Number(tb.dataset.taskDir));return}const b=e.target.closest('[data-move-product]');if(b)moveProduct(b.dataset.moveProduct,Number(b.dataset.dir))});
+document.getElementById('productsBoard').addEventListener('click',e=>{const history=e.target.closest('[data-history-task]');if(history){openDiagramHistory(history.dataset.historyTask,history.dataset.historySub||'');return}const tb=e.target.closest('[data-move-task]');if(tb){moveDiagramTask(tb.dataset.moveTask,Number(tb.dataset.taskDir));return}const b=e.target.closest('[data-move-product]');if(b)moveProduct(b.dataset.moveProduct,Number(b.dataset.dir))});
 let dragTask=null;
 document.getElementById('productsBoard').addEventListener('dragstart',e=>{
   const task=e.target.closest('[data-diagram-task]');
