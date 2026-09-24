@@ -308,7 +308,7 @@ td:last-child,th:last-child{padding-right:14px}
 .attendee-option{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius-ctl);background:var(--muted-50);font-size:13px;cursor:pointer}
 .attendee-option input{width:auto}
 .meeting-empty{padding:26px;border:1px dashed var(--input);border-radius:var(--radius-card);color:var(--muted-foreground);text-align:center;background:var(--muted-50)}
-.meeting-notes-list{display:grid;gap:12px}.meeting-week{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--muted-50);overflow:hidden}.meeting-week>summary{cursor:pointer;padding:13px 16px;font-weight:650;background:var(--card)}.meeting-week-list{display:grid;gap:10px;padding:12px}.meeting-select-actions{display:flex;gap:8px;margin:8px 0}
+.meeting-notes-list{display:grid;gap:12px}.meeting-week{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--muted-50);overflow:hidden}.meeting-week>summary{cursor:pointer;padding:13px 16px;font-weight:650;background:var(--card)}.meeting-week-list{display:grid;gap:10px;padding:12px}.meeting-select-actions{display:flex;gap:8px;margin:8px 0}.diary-compose{display:grid;grid-template-columns:170px minmax(260px,1fr) auto;gap:8px;align-items:start}.diary-list{display:grid;gap:10px;margin-top:12px}.diary-card{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--card);padding:12px}.diary-card textarea{width:100%;min-height:100px;margin-top:8px}.diary-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--muted-foreground);font-size:12px}.manual-history-add{display:grid;grid-template-columns:minmax(175px,auto) minmax(180px,1fr) auto;gap:6px;margin-top:7px}.manual-history-add input{min-width:0}@media(max-width:700px){.diary-compose,.manual-history-add{grid-template-columns:1fr}}
 .meeting-note{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--card);box-shadow:var(--shadow-xs);overflow:hidden}
 .meeting-note-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--muted-50)}
 .meeting-note-meta{display:grid;gap:3px}
@@ -452,7 +452,7 @@ body.presenting .owner-label,body.presenting .label{font-size:11.5px}
 </details>
 </div>
 </header>
-<div class="tabs"><button class="tab active" data-view="tasksView">Task List</button><button class="tab" data-view="diagramView">Product Diagram</button><button class="tab" data-view="calendarView">Calendar</button><button class="tab" data-view="meetingsView">Meeting Notes</button><button class="tab" data-view="deadlineUpdatesView">Deadline Updates</button><button class="tab" data-view="completedView">Done Tasks</button></div>
+<div class="tabs"><button class="tab active" data-view="tasksView">Task List</button><button class="tab" data-view="diagramView">Product Diagram</button><button class="tab" data-view="calendarView">Calendar</button><button class="tab" data-view="meetingsView">Meeting Notes</button><button class="tab" data-view="diaryView">Personal Diary</button><button class="tab" data-view="deadlineUpdatesView">Deadline Updates</button><button class="tab" data-view="completedView">Done Tasks</button></div>
 
 <div class="panel" id="statusLegendPanel">
   <strong>Status colour key</strong>
@@ -512,6 +512,19 @@ Will have meeting tomorrow</span></div><div class="subtasks-mini"><span class="l
   </div>
 </section>
 
+<section id="diaryView" class="view">
+  <div class="panel">
+    <strong>Personal Diary</strong>
+    <div class="note">Capture reminders, ideas, recommendations, and private working notes. The creation date and time are recorded automatically.</div>
+    <div class="diary-compose" style="margin-top:12px">
+      <select id="diaryCategory"><option>Reminder</option><option>Idea</option><option>Recommendation</option><option>General note</option></select>
+      <textarea id="newDiaryEntry" placeholder="Write what you need to remember, an idea, or a recommendation..."></textarea>
+      <button id="addDiaryEntry" class="primary" type="button">Add entry</button>
+    </div>
+  </div>
+  <div id="diaryList" class="diary-list"></div>
+</section>
+
 <section id="deadlineUpdatesView" class="view">
   <div class="panel">
     <div class="diagram-toolbar">
@@ -546,10 +559,10 @@ const embedded=JSON.parse(document.getElementById("snapshotData").textContent);
 let data=JSON.parse(JSON.stringify(embedded)),calDate=new Date(2026,8,1),viewsDirty=false,expandedSubtasks=new Set(),dragProduct=null,showBlockedSubtasks=false,deadlineItems=[];
 let cloudKey=sessionStorage.getItem("cortexGripTrackerKey")||"",cloudVersion=0,cloudReady=false,cloudDirty=false,cloudSaving=false,cloudBlocked=false;
 function migrate(){
-  data.tasks.forEach(t=>{if(!Array.isArray(t.subtasks))t.subtasks=[];t.subtasks.forEach(s=>{if(!Array.isArray(s.dateHistory))s.dateHistory=[];if(!Array.isArray(s.commentHistory))s.commentHistory=[]});if(!Array.isArray(t.dateHistory))t.dateHistory=[];if(!Array.isArray(t.commentHistory))t.commentHistory=[];if(t.nextUpdateDeadline==null)t.nextUpdateDeadline="";if(t.deadline==="Not confirmed yet")t.deadline="Awaiting deadline";if(t.nextUpdateDeadline==="Not confirmed yet")t.nextUpdateDeadline="Awaiting deadline"});
+  data.tasks.forEach(t=>{if(!Array.isArray(t.subtasks))t.subtasks=[];t.subtasks.forEach(s=>{if(!Array.isArray(s.dateHistory))s.dateHistory=[];if(!Array.isArray(s.commentHistory))s.commentHistory=[];if(!Array.isArray(s.manualHistory))s.manualHistory=[]});if(!Array.isArray(t.dateHistory))t.dateHistory=[];if(!Array.isArray(t.commentHistory))t.commentHistory=[];if(!Array.isArray(t.manualHistory))t.manualHistory=[];if(t.nextUpdateDeadline==null)t.nextUpdateDeadline="";if(t.deadline==="Not confirmed yet")t.deadline="Awaiting deadline";if(t.nextUpdateDeadline==="Not confirmed yet")t.nextUpdateDeadline="Awaiting deadline"});
   if(!Array.isArray(data.meetingPeople))data.meetingPeople=[];
   if(typeof data.archiveWorkbookUrl!=="string")data.archiveWorkbookUrl="";
-  if(!Array.isArray(data.meetingNotes))data.meetingNotes=[];
+  if(!Array.isArray(data.meetingNotes))data.meetingNotes=[];if(!Array.isArray(data.diaryEntries))data.diaryEntries=[];
   if(!Array.isArray(data.diagramTaskOrder))data.diagramTaskOrder=data.tasks.map(t=>t.id);
   const ids=new Set(data.tasks.map(t=>t.id));
   data.diagramTaskOrder=data.diagramTaskOrder.filter(id=>ids.has(id));
@@ -619,7 +632,7 @@ function renameProduct(i,newName){
   data.tasks.forEach(t=>{if(t.product===oldName)t.product=newName});
   save();renderProducts();renderTasks();setDirty();
 }
-function addTask(){const t={id:uid(),name:"",status:"Planning",product:data.products[0]||"",owner:"",nextUpdateDeadline:"",deadline:"",comment:"",done:false,subtasks:[],dateHistory:[],commentHistory:[]};data.tasks.push(t);data.diagramTaskOrder.push(t.id);save();renderTasks();setDirty()}
+function addTask(){const t={id:uid(),name:"",status:"Planning",product:data.products[0]||"",owner:"",nextUpdateDeadline:"",deadline:"",comment:"",done:false,subtasks:[],dateHistory:[],commentHistory:[],manualHistory:[]};data.tasks.push(t);data.diagramTaskOrder.push(t.id);save();renderTasks();setDirty()}
 function addDateLog(task,field,from,to,comment,source="Task"){
  if(String(from||"")===String(to||""))return;
  if(!Array.isArray(task.dateHistory))task.dateHistory=[];
@@ -629,7 +642,7 @@ function updateTask(id,f,v){const t=data.tasks.find(x=>x.id===id);if(!t)return;c
 function toggleDeadline(id,field,checked){const t=data.tasks.find(x=>x.id===id);if(!t)return;const value=checked?"Awaiting deadline":"";addDateLog(t,field,t[field],value,t.comment);t[field]=value;save();renderTasks();setDirty()}
 function setDeadlineMode(id,field,mode){const t=data.tasks.find(x=>x.id===id);if(!t)return;let value=t[field];if(mode==="awaiting")value="Awaiting deadline";else if(mode==="ongoing"&&field==="deadline")value="Ongoing — No Fixed End Date";else if(mode==="date")value="";addDateLog(t,field,t[field],value,t.comment);t[field]=value;save();renderTasks();setDirty()}
 function deleteTask(id){data.tasks=data.tasks.filter(t=>t.id!==id);data.diagramTaskOrder=data.diagramTaskOrder.filter(x=>x!==id);expandedSubtasks.delete(id);save();renderTasks();setDirty()}
-function addSubtask(taskId){const t=data.tasks.find(x=>x.id===taskId);if(!t)return;t.subtasks.push({id:uid("s"),title:"",status:"Planning",deadline:"",comment:"",dateHistory:[],commentHistory:[]});expandedSubtasks.add(taskId);save();renderTasks();setDirty()}
+function addSubtask(taskId){const t=data.tasks.find(x=>x.id===taskId);if(!t)return;t.subtasks.push({id:uid("s"),title:"",status:"Planning",deadline:"",comment:"",dateHistory:[],commentHistory:[],manualHistory:[]});expandedSubtasks.add(taskId);save();renderTasks();setDirty()}
 function updateSubtask(taskId,subId,field,value){const t=data.tasks.find(x=>x.id===taskId);if(!t)return;const sub=t.subtasks.find(x=>x.id===subId);if(!sub)return;const old=sub[field];if(field==="deadline"&&String(old||"")!==String(value||"")){if(!Array.isArray(sub.dateHistory))sub.dateHistory=[];sub.dateHistory.unshift({id:uid("sh"),changedAt:new Date().toISOString(),field:"deadline",from:String(old||""),to:String(value||""),comment:String(sub.comment||"")})}if(field==="comment"&&String(old||"")!==String(value||"")){if(!Array.isArray(sub.commentHistory))sub.commentHistory=[];sub.commentHistory.unshift({id:uid("sc"),changedAt:new Date().toISOString(),from:String(old||""),to:String(value||"")})}sub[field]=value;save();renderTasks();setDirty()}
 function deleteSubtask(taskId,subId){const t=data.tasks.find(x=>x.id===taskId);if(!t)return;t.subtasks=t.subtasks.filter(x=>x.id!==subId);save();renderTasks();setDirty()}
 function renderProducts(){document.getElementById("productList").innerHTML=data.products.map((p,i)=>'<span class="product-chip"><input data-edit-prod="'+i+'" value="'+esc(p)+'" aria-label="Edit Product / Process"><button data-del-prod="'+i+'" title="Delete Product / Process">×</button></span>').join("");const f=document.getElementById("productFilter"),old=f.value;f.innerHTML='<option value="">All Product / Process</option>'+data.products.map(p=>'<option value="'+esc(p)+'">'+esc(p)+'</option>').join("");if(data.products.includes(old))f.value=old;const sf=document.getElementById("statusFilter"),sOld=sf.value;sf.innerHTML='<option value="">All statuses</option>'+statuses.map(s=>'<option>'+s+'</option>').join("");if(statuses.includes(sOld))sf.value=sOld}
