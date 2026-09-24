@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CortexGrip Public Product Diagram</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+:root{--bg:#f9f8f7;--card:#fff;--muted:#f3f0ee;--border:#e8e3df;--text:#1c1917;--sub:#79706b;--primary:#f24e29}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,Arial,sans-serif}.page{padding:20px;max-width:2200px;margin:auto}
+header{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:12px}.brand{display:flex;align-items:center;gap:12px}.mark{width:38px;height:38px;border-radius:10px;background:#1c1917 url('/favicon.svg') center/contain no-repeat}.brand h1{font-size:18px;margin:0}.meta{font-size:12px;color:var(--sub)}
+.board-wrap{overflow:auto;padding:4px 4px 20px;margin-top:18px}.board{display:grid;gap:18px;align-items:start}.product{text-align:center}.product-head{padding:13px 14px;border-radius:12px;background:var(--primary);color:#fff;font-size:16px;font-weight:700;box-shadow:0 2px 6px #1c191720}.line{height:24px;width:2px;background:var(--border);margin:auto}.owners{display:grid;gap:18px}.branch{display:grid;justify-items:center}.owner{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 13px;min-width:180px;text-align:left}.label{display:block;color:var(--sub);font-size:11px;margin-bottom:2px}.tasks{display:grid;gap:10px;width:100%}.task{background:var(--card);border:1px solid var(--border);border-radius:12px;text-align:left;overflow:hidden}.task-head{padding:10px 12px;background:#faf8f6;border-bottom:1px solid var(--border)}.title{font-weight:650;margin-bottom:6px}.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:600;background:var(--muted);border:1px solid var(--border)}.task-body{padding:11px 12px}.dates{display:grid;grid-template-columns:1fr 1fr;gap:8px}.box{padding:8px;border:1px solid var(--border);border-radius:8px;background:#faf8f6}.comment{border-top:1px solid var(--border);padding-top:8px;margin-top:9px}.subs{border-top:1px dashed var(--border);padding-top:8px;margin-top:9px;font-size:11.5px;color:var(--sub)}.empty{padding:40px;text-align:center;color:var(--sub)}
+.status-in-progress{color:#1d4ed8;background:#eff6ff}.status-complete{color:#136e37;background:#ecfdf3}.status-blocked{color:#a61b12;background:#fff1f0}.status-on-hold{color:#9a4507;background:#fff8e7}.status-planning{color:#5b21b6;background:#f5f3ff}.status-post-completion-process{color:#0e6f68;background:#effcf9}
+@media(max-width:700px){.page{padding:10px}.board{grid-template-columns:1fr!important;min-width:0!important}.board-wrap{overflow:visible}.dates{grid-template-columns:1fr}header{align-items:flex-start}}
+</style>
+</head><body><main class="page"><header><div class="brand"><span class="mark"></span><div><h1>CortexGrip Product / Process Diagram</h1><div class="meta">Public read-only view</div></div></div><div id="updated" class="meta">Loading…</div></header><div class="board-wrap"><div id="board" class="board"><div class="empty">Loading diagram…</div></div></div></main>
+<script>
+const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+const cls=v=>"status-"+String(v||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+const date=v=>/^\d{4}-\d{2}-\d{2}$/.test(v||"")?new Intl.DateTimeFormat(undefined,{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(v+"T00:00:00Z")):(v||"No deadline");
+function render(data){
+ const order=new Map((data.diagramTaskOrder||[]).map((id,i)=>[id,i])),products=data.products||[],tasks=data.tasks||[],board=document.getElementById("board");
+ board.style.gridTemplateColumns="repeat("+Math.max(products.length,1)+",minmax(310px,1fr))";board.style.minWidth=Math.max(310,products.length*330)+"px";
+ board.innerHTML=products.length?products.map(product=>{
+  const owners=[];tasks.filter(t=>t.product===product).forEach(t=>{const o=(t.owner||"").trim()||"Unassigned";if(!owners.includes(o))owners.push(o)});
+  const ownerHtml=owners.map(owner=>{
+   const list=tasks.filter(t=>t.product===product&&((t.owner||"").trim()||"Unassigned")===owner).sort((a,b)=>(order.get(a.id)??999999)-(order.get(b.id)??999999));
+   return '<div class="branch"><div class="owner"><span class="label">Responsible</span><strong>'+esc(owner)+'</strong></div><div class="line"></div><div class="tasks">'+list.map(t=>{
+    const subs=(t.subtasks||[]).length?'<div class="subs"><span class="label">Subtasks ('+t.subtasks.length+')</span>'+t.subtasks.map(s=>'<div>• <b>'+esc(s.title||"Untitled subtask")+'</b> — '+esc(s.status)+(s.deadline?' · '+esc(date(s.deadline)):'')+'</div>').join("")+'</div>':"";
+    return '<article class="task"><div class="task-head"><div class="title">'+esc(t.name||"Untitled task")+'</div><span class="pill '+cls(t.status)+'">'+esc(t.status)+'</span></div><div class="task-body"><div class="dates"><div class="box"><span class="label">Next update</span>'+esc(date(t.nextUpdateDeadline))+'</div><div class="box"><span class="label">Finish deadline</span>'+esc(date(t.deadline))+'</div></div><div class="comment"><span class="label">Comments</span>'+esc(t.comment||"No comment").replaceAll("\n","<br>")+'</div>'+subs+'</div></article>'
+   }).join("")+'</div></div>'
+  }).join("");
+  return '<section class="product"><div class="product-head">'+esc(product)+'</div><div class="line"></div><div class="owners">'+ownerHtml+'</div></section>'
+ }).join(""):'<div class="empty">No products are available.</div>';
+ document.getElementById("updated").textContent=data.updatedAt?"Updated "+new Date(data.updatedAt).toLocaleString():"No saved data";
+}
+async function load(){try{const r=await fetch("/api/public-diagram",{cache:"no-store"}),d=await r.json();if(!r.ok)throw Error(d.error||"Unable to load diagram");render(d)}catch(e){document.getElementById("board").innerHTML='<div class="empty">'+esc(e.message)+'</div>';document.getElementById("updated").textContent="Unavailable"}}
+load();setInterval(load,60000);
+</script></body></html>
