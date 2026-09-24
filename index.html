@@ -746,16 +746,20 @@ function formatMeetingDateTime(value){
   const d=new Date(value);if(Number.isNaN(d.getTime()))return "Unknown start time";
   return new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(d);
 }
+function meetingWeek(value){
+ const d=new Date(value),day=(d.getDay()+6)%7,start=new Date(d);start.setHours(0,0,0,0);start.setDate(d.getDate()-day);const finish=new Date(start);finish.setDate(start.getDate()+6);
+ return {key:start.toISOString().slice(0,10),label:new Intl.DateTimeFormat(undefined,{day:"numeric",month:"short",year:"numeric"}).format(start)+" – "+new Intl.DateTimeFormat(undefined,{day:"numeric",month:"short",year:"numeric"}).format(finish)};
+}
 function renderMeetings(){
-  const people=document.getElementById("meetingPeopleList"),attendees=document.getElementById("meetingAttendees"),notes=document.getElementById("meetingNotesList");
-  if(!people||!attendees||!notes)return;
-  people.innerHTML=data.meetingPeople.length?data.meetingPeople.map(p=>'<span class="person-chip"><span>'+esc(p.name)+'</span><button data-del-meeting-person="'+p.id+'" title="Remove '+esc(p.name)+'">×</button></span>').join(""):'<span class="note">No people added yet.</span>';
-  attendees.innerHTML=data.meetingPeople.length?data.meetingPeople.map(p=>'<label class="attendee-option"><input type="checkbox" data-meeting-attendee="'+p.id+'"> <span>'+esc(p.name)+'</span></label>').join(""):'<div class="meeting-empty">Add someone before starting a meeting note.</div>';
-  const ordered=[...data.meetingNotes].sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt));
-  notes.innerHTML=ordered.length?ordered.map(n=>{
-    const names=(n.attendeeNames&&n.attendeeNames.length?n.attendeeNames:(n.personIds||[]).map(id=>{const p=data.meetingPeople.find(x=>x.id===id);return p?p.name:"Removed person"})).join(", ");
-    return '<article class="meeting-note"><div class="meeting-note-head"><div class="meeting-note-meta"><span class="meeting-note-time">'+esc(formatMeetingDateTime(n.startedAt))+'</span><span class="meeting-note-people">With '+esc(names||"No attendees")+'</span></div><button class="danger" data-del-meeting-note="'+n.id+'">Delete</button></div><div class="meeting-note-body"><input data-meeting-note="'+n.id+'" data-note-field="title" value="'+esc(n.title||"")+'" placeholder="Meeting title or subject"><textarea data-meeting-note="'+n.id+'" data-note-field="body" placeholder="Write meeting notes, decisions, and follow-ups...">'+esc(n.body||"")+'</textarea><div class="meeting-note-actions"><span class="note">Saved automatically</span></div></div></article>';
-  }).join(""):'<div class="meeting-empty">No meeting notes yet. Choose people and start your first note.</div>';
+ const people=document.getElementById("meetingPeopleList"),attendees=document.getElementById("meetingAttendees"),notes=document.getElementById("meetingNotesList");if(!people||!attendees||!notes)return;
+ people.innerHTML=data.meetingPeople.length?data.meetingPeople.map(p=>'<span class="person-chip"><span>'+esc(p.name)+'</span><button data-del-meeting-person="'+p.id+'" title="Remove '+esc(p.name)+'">×</button></span>').join(""):'<span class="note">No people added yet.</span>';
+ attendees.innerHTML=data.meetingPeople.length?data.meetingPeople.map(p=>'<label class="attendee-option"><input type="checkbox" data-meeting-attendee="'+p.id+'"> <span>'+esc(p.name)+'</span></label>').join(""):'<div class="meeting-empty">Add someone before starting a meeting note.</div>';
+ const ordered=[...data.meetingNotes].sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt)),groups=new Map();
+ ordered.forEach(n=>{const w=meetingWeek(n.startedAt);if(!groups.has(w.key))groups.set(w.key,{label:w.label,notes:[]});groups.get(w.key).notes.push(n)});
+ notes.innerHTML=groups.size?[...groups.entries()].map(([key,group],index)=>'<details class="meeting-week" '+(index===0?'open':'')+'><summary>Week '+esc(group.label)+' · '+group.notes.length+' meeting'+(group.notes.length===1?'':'s')+'</summary><div class="meeting-week-list">'+group.notes.map(n=>{
+  const names=(n.attendeeNames&&n.attendeeNames.length?n.attendeeNames:(n.personIds||[]).map(id=>{const p=data.meetingPeople.find(x=>x.id===id);return p?p.name:"Removed person"})).join(", ");
+  return '<article class="meeting-note"><div class="meeting-note-head"><div class="meeting-note-meta"><span class="meeting-note-time">'+esc(formatMeetingDateTime(n.startedAt))+'</span><span class="meeting-note-people">With '+esc(names||"No attendees")+'</span></div><button class="danger" data-del-meeting-note="'+n.id+'">Delete</button></div><div class="meeting-note-body"><input data-meeting-note="'+n.id+'" data-note-field="title" value="'+esc(n.title||"")+'" placeholder="Meeting title or subject"><textarea data-meeting-note="'+n.id+'" data-note-field="body" placeholder="Write meeting notes, decisions, and follow-ups...">'+esc(n.body||"")+'</textarea><div class="meeting-note-actions"><span class="note">Saved automatically</span></div></div></article>';
+ }).join("")+'</div></details>').join(""):'<div class="meeting-empty">No meeting notes yet. Choose one or more people and start your first note.</div>';
 }
 function currentTheme(){return document.documentElement.dataset.theme==="dark"?"dark":"light"}
 function updateThemeButton(){const b=document.getElementById("themeToggle");if(b)b.textContent=currentTheme()==="dark"?"Light mode":"Dark mode"}
@@ -870,6 +874,8 @@ document.getElementById('prevMonth').onclick=()=>{calDate=new Date(calDate.getFu
 document.getElementById('addMeetingPerson').onclick=addMeetingPerson;
 document.getElementById('newMeetingPerson').addEventListener('keydown',e=>{if(e.key==='Enter')addMeetingPerson()});
 document.getElementById('startMeetingNote').onclick=startMeetingNote;
+document.getElementById('selectAllAttendees').onclick=()=>document.querySelectorAll('[data-meeting-attendee]').forEach(x=>x.checked=true);
+document.getElementById('clearAttendees').onclick=()=>document.querySelectorAll('[data-meeting-attendee]').forEach(x=>x.checked=false);
 document.getElementById('meetingPeopleList').onclick=e=>{const b=e.target.closest('[data-del-meeting-person]');if(b)deleteMeetingPerson(b.dataset.delMeetingPerson)};
 document.getElementById('meetingNotesList').addEventListener('input',e=>{const x=e.target.closest('[data-meeting-note]');if(x)updateMeetingNote(x.dataset.meetingNote,x.dataset.noteField,x.value)});
 document.getElementById('meetingNotesList').onclick=e=>{const b=e.target.closest('[data-del-meeting-note]');if(b)deleteMeetingNote(b.dataset.delMeetingNote)};
