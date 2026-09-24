@@ -11,7 +11,9 @@ export async function onRequestGet(context){
   tasks:(Array.isArray(data.tasks)?data.tasks:[]).map(task=>({
    id:String(task.id||""),name:String(task.name||""),status:String(task.status||""),product:String(task.product||""),
    owner:String(task.owner||""),nextUpdateDeadline:String(task.nextUpdateDeadline||""),deadline:String(task.deadline||""),
-   comment:String(task.comment||""),commentHistory:(Array.isArray(task.commentHistory)?task.commentHistory:[]).map(entry=>({\n    changedAt:String(entry.changedAt||""),from:String(entry.from||""),to:String(entry.to||"")\n   })),subtasks:(Array.isArray(task.subtasks)?task.subtasks:[]).map(sub=>({
+   comment:String(task.comment||""),commentHistory:(Array.isArray(task.commentHistory)?task.commentHistory:[]).map(entry=>({
+    changedAt:String(entry.changedAt||""),from:String(entry.from||""),to:String(entry.to||"")
+   })),subtasks:(Array.isArray(task.subtasks)?task.subtasks:[]).map(sub=>({
     title:String(sub.title||""),status:String(sub.status||""),deadline:String(sub.deadline||"")
    }))
   })),
