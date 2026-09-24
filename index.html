@@ -217,7 +217,7 @@ td:last-child,th:last-child{padding-right:14px}
 .subtask-head strong{font-size:13.5px;font-weight:600}
 .subtask-grid{display:grid;gap:8px}
 .subtask-item{display:grid;grid-template-columns:minmax(180px,2fr) minmax(145px,1fr) minmax(165px,1fr) minmax(165px,1fr) minmax(220px,2fr) auto;gap:8px;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-ctl);padding:8px;box-shadow:var(--shadow-xs)}
-.subtask-item textarea{min-height:38px;resize:vertical}
+.subtask-item textarea{min-height:38px;resize:vertical}.table-wrap td textarea,.subtask-item textarea{border:1px solid var(--input);border-left:3px solid var(--primary);border-radius:7px;background:var(--card);box-shadow:inset 0 1px 2px rgba(28,25,23,.04)}
 .subtask-item input,.subtask-item textarea{background-color:transparent;border-color:transparent;min-height:32px}
 .subtask-item input:hover,.subtask-item textarea:hover{border-color:var(--input);background-color:var(--card)}
 .subtask-item input:focus,.subtask-item textarea:focus{background-color:var(--card);border-color:var(--primary)}
@@ -249,7 +249,7 @@ td:last-child,th:last-child{padding-right:14px}
 .product-line{width:2px;height:24px;margin:0 auto;background:var(--border);border-radius:999px}
 .owner-list{display:grid;gap:18px}
 .owner-branch{display:grid;justify-items:center}
-.owner-box{display:inline-block;min-width:190px;max-width:95%;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-ctl);box-shadow:var(--shadow-xs);text-align:left}
+.owner-box{display:inline-block;min-width:190px;max-width:95%;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-ctl);box-shadow:var(--shadow-xs);text-align:center}
 .owner-box strong{font-size:13.5px;font-weight:600}
 .owner-label,.label{display:block;color:var(--muted-foreground);font-size:11px;font-weight:500;margin-bottom:2px}
 .owner-line{width:2px;height:18px;margin:0 auto;background:var(--border);border-radius:999px}
@@ -743,11 +743,11 @@ function renderDiagram(){
       return '<div class="owner-branch"><div class="owner-box"><span class="owner-label">Responsible</span><strong>'+esc(owner)+'</strong></div><div class="owner-line"></div><div class="task-list">'+
       arr.map((t,ti)=>{
         const visibleSubs=(t.subtasks||[]).filter(s=>diagramStatusVisible(s.status)),hiddenCount=(t.subtasks||[]).length-visibleSubs.length;
-        const mini=visibleSubs.length||hiddenCount?'<div class="subtasks-mini"><span class="label">Subtasks ('+visibleSubs.length+(hiddenCount&&diagramViewMode!=="all"?' shown · '+hiddenCount+' hidden':'')+')</span>'+visibleSubs.map(s=>'<div class="subtask-state '+statusClass(s.status)+'"><button class="diagram-source" type="button" data-jump-task="'+t.id+'" data-jump-sub="'+s.id+'">• <b>'+esc(s.title||"Untitled subtask")+'</b></button> — '+esc(s.status)+' · Next: '+esc(isDate(s.nextUpdateDeadline)?formatDisplayDate(s.nextUpdateDeadline):(s.nextUpdateDeadline||"No deadline"))+' · Finish: '+esc(isDate(s.deadline)?formatDisplayDate(s.deadline):(s.deadline||"No deadline"))+' <button class="history-btn" type="button" data-history-task="'+t.id+'" data-history-sub="'+s.id+'" title="View history" aria-label="View subtask history">🕘</button></div>').join('')+'</div>':'';
+        const mini=visibleSubs.length||hiddenCount?'<div class="subtasks-mini"><span class="label">Subtasks ('+visibleSubs.length+(hiddenCount&&diagramViewMode!=="all"?' shown · '+hiddenCount+' hidden':'')+')</span>'+visibleSubs.map(s=>'<div class="subtask-state '+statusClass(s.status)+'"><button class="diagram-source" type="button" data-jump-task="'+t.id+'" data-jump-sub="'+s.id+'">• <b>'+esc(s.title||"Untitled subtask")+'</b></button> — '+esc(s.status)+' · Next: '+esc(isDate(s.nextUpdateDeadline)?formatDisplayDate(s.nextUpdateDeadline):(s.nextUpdateDeadline||""))+' · Finish: '+esc(isDate(s.deadline)?formatDisplayDate(s.deadline):(s.deadline||""))+' <button class="history-btn" type="button" data-history-task="'+t.id+'" data-history-sub="'+s.id+'" title="View history" aria-label="View subtask history">🕘</button></div>').join('')+'</div>':'';
         return '<div class="task-card" draggable="true" data-diagram-task="'+t.id+'">'+
           '<div class="task-card-head"><div class="task-head-main"><div class="task-title"><button class="diagram-source" type="button" data-jump-task="'+t.id+'">'+esc(t.name||"Untitled task")+'</button></div><span class="status-pill '+statusClass(t.status)+'">'+esc(t.status)+'</span></div>'+
           '<div class="task-reorder"><button data-move-task="'+t.id+'" data-task-dir="-1" '+(ti===0?'disabled':'')+'>↑</button><button data-move-task="'+t.id+'" data-task-dir="1" '+(ti===arr.length-1?'disabled':'')+'>↓</button></div></div>'+
-          '<div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">'+esc(isDate(t.nextUpdateDeadline)?formatDisplayDate(t.nextUpdateDeadline):(t.nextUpdateDeadline||"No deadline"))+'</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">'+esc(isDate(t.deadline)?formatDisplayDate(t.deadline):(t.deadline||"No deadline"))+'</span></div></div>'+
+          '<div class="task-info"><div class="deadline-pair"><div class="deadline-box"><span class="label">Next update</span><span class="value">'+esc(isDate(t.nextUpdateDeadline)?formatDisplayDate(t.nextUpdateDeadline):(t.nextUpdateDeadline||""))+'</span></div><div class="deadline-box"><span class="label">Finish deadline</span><span class="value">'+esc(isDate(t.deadline)?formatDisplayDate(t.deadline):(t.deadline||""))+'</span></div></div>'+
           (t.comment?'<div class="comment-box" data-jump-task="'+t.id+'"><span class="label">Comments <button class="history-btn" type="button" data-history-task="'+t.id+'" title="View history" aria-label="View task history">🕘</button></span><button class="diagram-source value" type="button" data-jump-task="'+t.id+'">'+esc(t.comment).replaceAll("\\n","<br>")+'</button></div>':'<div style="text-align:right"><button class="history-btn" type="button" data-history-task="'+t.id+'" title="View history" aria-label="View task history">🕘</button></div>')+mini+'</div></div>';
       }).join('')+'</div></div>';
     }).join('');
