@@ -118,6 +118,14 @@ export async function onRequestPost(context) {
     return json({ ok: true, archived: true });
   }
 
+  if (input.action === "deleteItem") {
+    if (!isAdmin(context)) return json({ error: "Admin key required." }, 401);
+    const id = clean(input.id, 80), items = await readItems(context.env.DEADLINES);
+    if (!items.some(entry => entry.id === id)) return json({ error: "Deliverable not found." }, 404);
+    await context.env.DEADLINES.put(DATA_KEY, JSON.stringify(items.filter(entry => entry.id !== id)));
+    return json({ ok: true, deleted: true });
+  }
+
   if (input.action === "updateItem") {
     if (!isAdmin(context)) return json({ error: "Admin key required." }, 401);
     const id = clean(input.id, 80), items = await readItems(context.env.DEADLINES), item = items.find(entry => entry.id === id);

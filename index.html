@@ -808,7 +808,7 @@ function renderDeadlineList(){
  document.getElementById("deadlineFilterCount").textContent=items.length+" of "+deadlineItems.length+" updates";
  if(!items.length){list.innerHTML="";status.style.display="block";status.textContent=deadlineItems.length?"No updates match these dates.":"No deadline updates have been submitted yet.";return}
  status.style.display="none";
- list.innerHTML=items.map(item=>'<article class="deadline-submission '+(item.done?'is-done':'')+'" data-deadline-item="'+esc(item.id)+'"><div><input data-deadline-edit="title" value="'+esc(item.title||"")+'"><div class="deadline-submission-meta">Submitted by '+esc(item.submittedBy||"Unknown")+' · '+esc(formatMeetingDateTime(item.submittedAt))+'</div></div><textarea data-deadline-edit="description">'+esc(item.description||"")+'</textarea><div class="deadline-submission-actions"><label class="deadline-submission-meta">Deadline</label><input type="date" data-deadline-edit="deadline" value="'+esc(item.deadline||"")+'"><label class="deadline-done"><input type="checkbox" data-deadline-edit="done" '+(item.done?'checked':'')+'> Done</label><button type="button" class="primary" data-save-deadline>Save changes</button><span class="deadline-submission-meta" data-save-status></span></div></article>').join("");
+ list.innerHTML=items.map(item=>'<article class="deadline-submission '+(item.done?'is-done':'')+'" data-deadline-item="'+esc(item.id)+'"><div><input data-deadline-edit="title" value="'+esc(item.title||"")+'"><div class="deadline-submission-meta">Submitted by '+esc(item.submittedBy||"Unknown")+' · '+esc(formatMeetingDateTime(item.submittedAt))+'</div></div><textarea data-deadline-edit="description">'+esc(item.description||"")+'</textarea><div class="deadline-submission-actions"><label class="deadline-submission-meta">Deadline</label><input type="date" data-deadline-edit="deadline" value="'+esc(item.deadline||"")+'"><label class="deadline-done"><input type="checkbox" data-deadline-edit="done" '+(item.done?'checked':'')+'> Done</label><button type="button" class="primary" data-save-deadline>Save changes</button><button type="button" class="danger" data-delete-deadline>Delete</button><span class="deadline-submission-meta" data-save-status></span></div></article>').join("");
 }
 async function renderDeadlineUpdates(){
  const status=document.getElementById("deadlineUpdatesStatus"),list=document.getElementById("deadlineUpdatesList");if(!status||!list)return;
@@ -938,22 +938,19 @@ document.getElementById("downloadDeadlineArchive").onclick=async()=>{
  }catch(error){alert(error.message)}finally{button.disabled=false}
 };
 document.getElementById("deadlineUpdatesList").onclick=async e=>{
- const button=e.target.closest("[data-save-deadline]");if(!button)return;
- const key=deadlineAdminKey();if(!key)return;
- const card=button.closest("[data-deadline-item"),status=card.querySelector("[data-save-status]");
- const values={id:card.dataset.deadlineItem};
- card.querySelectorAll("[data-deadline-edit]").forEach(x=>values[x.dataset.deadlineEdit]=x.type==="checkbox"?x.checked:x.value);
+ const deleteButton=e.target.closest("[data-delete-deadline]"),saveButton=e.target.closest("[data-save-deadline]");if(!deleteButton&&!saveButton)return;
+ const button=deleteButton||saveButton,key=deadlineAdminKey();if(!key)return;
+ const card=button.closest("[data-deadline-item]"),status=card.querySelector("[data-save-status]"),id=card.dataset.deadlineItem;
+ if(deleteButton){
+  if(!confirm("Permanently delete this deadline update? This cannot be undone."))return;
+  button.disabled=true;status.textContent="Deleting...";
+  try{const response=await fetch("/api/deadlines",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({action:"deleteItem",id})});const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||"Unable to delete");deadlineItems=deadlineItems.filter(item=>String(item.id)!==String(id));renderDeadlineList()}catch(error){status.textContent=error.message}finally{button.disabled=false}
+  return;
+ }
+ const values={id};card.querySelectorAll("[data-deadline-edit]").forEach(x=>values[x.dataset.deadlineEdit]=x.type==="checkbox"?x.checked:x.value);
  if(values.done&&!confirm("Mark this deliverable done? It will move to the completed archive and disappear from the dashboard."))return;
- values.action=values.done?"archiveItem":"updateItem";
- button.disabled=true;status.textContent=values.done?"Archiving...":"Saving...";
- try{
-  const response=await fetch("/api/deadlines",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify(values)});
-  const payload=await response.json().catch(()=>({}));
-  if(!response.ok)throw new Error(payload.error||"Unable to save");
-  if(values.done){deadlineItems=deadlineItems.filter(item=>String(item.id)!==String(values.id));renderDeadlineList()}
-  else{const item=deadlineItems.find(item=>String(item.id)===String(values.id));if(item)Object.assign(item,values);status.textContent="Saved"}
- }catch(error){status.textContent=error.message;card.querySelector('[data-deadline-edit="done"]').checked=false}
- finally{button.disabled=false}
+ values.action=values.done?"archiveItem":"updateItem";button.disabled=true;status.textContent=values.done?"Archiving...":"Saving...";
+ try{const response=await fetch("/api/deadlines",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify(values)});const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||"Unable to save");if(values.done){deadlineItems=deadlineItems.filter(item=>String(item.id)!==String(values.id));renderDeadlineList()}else{const item=deadlineItems.find(item=>String(item.id)===String(values.id));if(item)Object.assign(item,values);status.textContent="Saved"}}catch(error){status.textContent=error.message;card.querySelector('[data-deadline-edit="done"]').checked=false}finally{button.disabled=false}
 };
 connectCloud();
 })();
