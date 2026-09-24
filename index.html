@@ -764,22 +764,19 @@ function renderMeetings(){
 function currentTheme(){return document.documentElement.dataset.theme==="dark"?"dark":"light"}
 function updateThemeButton(){const b=document.getElementById("themeToggle");if(b)b.textContent=currentTheme()==="dark"?"Light mode":"Dark mode"}
 function toggleTheme(){const next=currentTheme()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("cortexGripTheme",next)}catch(e){}updateThemeButton()}
-async function renderDeadlineUpdates(){
-  const status=document.getElementById("deadlineUpdatesStatus"),list=document.getElementById("deadlineUpdatesList");if(!status||!list)return;
-  status.style.display="block";status.textContent="Loading deadline updates...";list.innerHTML="";
-  try{
-    const response=await fetch("/api/deadlines",{headers:{Accept:"application/json"}});if(!response.ok)throw new Error("Request failed");
-    const payload=await response.json(),items=Array.isArray(payload.items)?payload.items:[];
-    if(!items.length){status.textContent="No deadline updates have been submitted yet.";return}
-    status.style.display="none";
-    list.innerHTML=items.map(item=>'<article class="deadline-submission '+(item.done?'is-done':'')+'" data-deadline-item="'+esc(item.id)+'"><div><input data-deadline-edit="title" value="'+esc(item.title||"")+'"><div class="deadline-submission-meta">Submitted by '+esc(item.submittedBy||"Unknown")+' · '+esc(formatMeetingDateTime(item.submittedAt))+'</div></div><textarea data-deadline-edit="description">'+esc(item.description||"")+'</textarea><div class="deadline-submission-actions"><label class="deadline-submission-meta">Deadline</label><input type="date" data-deadline-edit="deadline" value="'+esc(item.deadline||"")+'"><label class="deadline-done"><input type="checkbox" data-deadline-edit="done" '+(item.done?'checked':'')+'> Done</label><button type="button" class="primary" data-save-deadline>Save changes</button><span class="deadline-submission-meta" data-save-status>'+''+'</span></div></article>').join("");
-  }catch(e){status.textContent="Deadline updates are unavailable until the Cloudflare storage binding is configured."}
+function renderDeadlineList(){
+ const status=document.getElementById("deadlineUpdatesStatus"),list=document.getElementById("deadlineUpdatesList"),deadline=document.getElementById("deadlineFilterDate").value,submitted=document.getElementById("submittedFilterDate").value;
+ const items=deadlineItems.filter(item=>(!deadline||item.deadline===deadline)&&(!submitted||String(item.submittedAt||"").slice(0,10)===submitted));
+ document.getElementById("deadlineFilterCount").textContent=items.length+" of "+deadlineItems.length+" updates";
+ if(!items.length){list.innerHTML="";status.style.display="block";status.textContent=deadlineItems.length?"No updates match these dates.":"No deadline updates have been submitted yet.";return}
+ status.style.display="none";
+ list.innerHTML=items.map(item=>'<article class="deadline-submission '+(item.done?'is-done':'')+'" data-deadline-item="'+esc(item.id)+'"><div><input data-deadline-edit="title" value="'+esc(item.title||"")+'"><div class="deadline-submission-meta">Submitted by '+esc(item.submittedBy||"Unknown")+' · '+esc(formatMeetingDateTime(item.submittedAt))+'</div></div><textarea data-deadline-edit="description">'+esc(item.description||"")+'</textarea><div class="deadline-submission-actions"><label class="deadline-submission-meta">Deadline</label><input type="date" data-deadline-edit="deadline" value="'+esc(item.deadline||"")+'"><label class="deadline-done"><input type="checkbox" data-deadline-edit="done" '+(item.done?'checked':'')+'> Done</label><button type="button" class="primary" data-save-deadline>Save changes</button><span class="deadline-submission-meta" data-save-status></span></div></article>').join("");
 }
-function renderArchiveWorkbookLink(){
- const input=document.getElementById("archiveWorkbookUrl"),link=document.getElementById("openArchiveWorkbook");
- input.value=data.archiveWorkbookUrl||"";
- link.hidden=!data.archiveWorkbookUrl;
- if(data.archiveWorkbookUrl)link.href=data.archiveWorkbookUrl;else link.removeAttribute("href");
+async function renderDeadlineUpdates(){
+ const status=document.getElementById("deadlineUpdatesStatus"),list=document.getElementById("deadlineUpdatesList");if(!status||!list)return;
+ status.style.display="block";status.textContent="Loading deadline updates...";list.innerHTML="";
+ try{const response=await fetch("/api/deadlines",{headers:{Accept:"application/json"}});if(!response.ok)throw new Error("Request failed");const payload=await response.json();deadlineItems=Array.isArray(payload.items)?payload.items:[];renderDeadlineList()}
+ catch(e){status.textContent="Deadline updates are unavailable until the Cloudflare storage binding is configured."}
 }
 function subtaskArchiveHtml(t){
  const subs=t.subtasks||[];if(!subs.length)return '<div class="note" style="margin-top:10px">No subtasks recorded.</div>';
@@ -804,7 +801,7 @@ function downloadCompletedCsv(){
  const rows=data.tasks.filter(t=>t.done||t.status==="Complete").map(t=>[t.id,t.name,t.status,t.product,t.owner,t.nextUpdateDeadline,t.deadline,t.comment,(t.commentHistory||[]).map(h=>formatMeetingDateTime(h.changedAt)+": "+(h.from||"Blank")+" -> "+(h.to||"Blank")).join("\\n"),(t.dateHistory||[]).map(h=>formatMeetingDateTime(h.changedAt)+" "+h.field+": "+(h.from||"Blank")+" -> "+(h.to||"Blank")+" | "+(h.comment||"")).join("\\n"),(t.subtasks||[]).map(s=>{const ch=(s.commentHistory||[]).map(h=>formatMeetingDateTime(h.changedAt)+": "+(h.from||"Blank")+" -> "+(h.to||"Blank")).join(" | "),dh=(s.dateHistory||[]).map(h=>formatMeetingDateTime(h.changedAt)+": "+(h.from||"Blank")+" -> "+(h.to||"Blank")).join(" | ");return (s.title||"Untitled")+" ["+(s.status||"")+"] deadline="+(s.deadline||"")+" comment="+(s.comment||"")+" commentHistory={"+ch+"} deadlineHistory={"+dh+"}"}).join("\\n")]);
  downloadBlob("cortexgrip-completed-tasks.csv","\uFEFF"+[headers,...rows].map(r=>r.map(cell).join(",")).join("\\r\\n"),"text/csv;charset=utf-8");
 }
-function renderAll(){migrate();renderProducts();renderTasks();renderDiagram();renderCalendar();renderMeetings();renderCompleted();updateThemeButton();renderArchiveWorkbookLink();renderDeadlineUpdates()}
+function renderAll(){migrate();renderProducts();renderTasks();renderDiagram();renderCalendar();renderMeetings();renderCompleted();updateThemeButton();renderDeadlineUpdates()}
 function downloadBlob(name,text,type="text/html;charset=utf-8"){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
 function exportCSV(){const rows=[["Task Name","Status","Product / Process","Responsible","Next Update Deadline","Finish Deadline","Completed","Subtask Count","Comment"],...data.tasks.map(t=>[t.name,t.status,t.product,t.owner,t.nextUpdateDeadline,t.deadline,t.done?"Yes":"No",(t.subtasks||[]).length,t.comment])];downloadBlob("cortexgrip-task-list.csv",rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\\n'),"text/csv;charset=utf-8")}
 function staticDiagramHtml(){
@@ -881,19 +878,12 @@ document.getElementById('meetingNotesList').addEventListener('input',e=>{const x
 document.getElementById('meetingNotesList').onclick=e=>{const b=e.target.closest('[data-del-meeting-note]');if(b)deleteMeetingNote(b.dataset.delMeetingNote)};
 document.getElementById('themeToggle').onclick=toggleTheme;
 document.getElementById('refreshDeadlineUpdates').onclick=renderDeadlineUpdates;
+document.getElementById('deadlineFilterDate').onchange=renderDeadlineList;document.getElementById('submittedFilterDate').onchange=renderDeadlineList;document.getElementById('clearDeadlineFilters').onclick=()=>{document.getElementById('deadlineFilterDate').value='';document.getElementById('submittedFilterDate').value='';renderDeadlineList()};
 function deadlineAdminKey(){
  let key=sessionStorage.getItem("cortexGripTrackerKey")||sessionStorage.getItem("cortexGripAdminKey");
  if(!key){key=prompt("Enter your private CortexGrip tracker key");if(key)sessionStorage.setItem("cortexGripAdminKey",key)}
  return key;
 }
-document.getElementById("saveArchiveWorkbookUrl").onclick=()=>{
- const input=document.getElementById("archiveWorkbookUrl"),status=document.getElementById("archiveWorkbookStatus");
- const value=input.value.trim();
- if(value){
-  try{const url=new URL(value);if(url.protocol!=="https:")throw Error("Use a secure HTTPS link")}catch(e){status.textContent="Enter a valid HTTPS workbook URL.";return}
- }
- data.archiveWorkbookUrl=value;save();renderArchiveWorkbookLink();status.textContent=value?"Link saved with tracker data.":"Link removed.";
-};
 document.getElementById("downloadDeadlineArchive").onclick=async()=>{
  const key=deadlineAdminKey();if(!key)return;
  const button=document.getElementById("downloadDeadlineArchive");button.disabled=true;
@@ -910,15 +900,15 @@ document.getElementById("deadlineUpdatesList").onclick=async e=>{
  const card=button.closest("[data-deadline-item"),status=card.querySelector("[data-save-status]");
  const values={id:card.dataset.deadlineItem};
  card.querySelectorAll("[data-deadline-edit]").forEach(x=>values[x.dataset.deadlineEdit]=x.type==="checkbox"?x.checked:x.value);
- if(values.done&&!confirm("Mark this deliverable done? It will move to the completed archive and disappear from the dashboard. Download the completed CSV to update your OneDrive Excel workbook."))return;
+ if(values.done&&!confirm("Mark this deliverable done? It will move to the completed archive and disappear from the dashboard."))return;
  values.action=values.done?"archiveItem":"updateItem";
  button.disabled=true;status.textContent=values.done?"Archiving...":"Saving...";
  try{
   const response=await fetch("/api/deadlines",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify(values)});
   const payload=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(payload.error||"Unable to save");
-  if(values.done){card.remove();const list=document.getElementById("deadlineUpdatesList");if(!list.children.length){const info=document.getElementById("deadlineUpdatesStatus");info.style.display="block";info.textContent="No deadline updates have been submitted yet."}}
-  else status.textContent="Saved";
+  if(values.done){deadlineItems=deadlineItems.filter(item=>String(item.id)!==String(values.id));renderDeadlineList()}
+  else{const item=deadlineItems.find(item=>String(item.id)===String(values.id));if(item)Object.assign(item,values);status.textContent="Saved"}
  }catch(error){status.textContent=error.message;card.querySelector('[data-deadline-edit="done"]').checked=false}
  finally{button.disabled=false}
 };
