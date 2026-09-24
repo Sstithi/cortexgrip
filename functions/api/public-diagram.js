@@ -18,7 +18,7 @@ export async function onRequestGet(context){
    })),manualHistory:(Array.isArray(task.manualHistory)?task.manualHistory:[]).map(entry=>({
     occurredAt:String(entry.occurredAt||entry.addedAt||""),addedAt:String(entry.addedAt||""),note:String(entry.note||"")
    })),subtasks:(Array.isArray(task.subtasks)?task.subtasks:[]).map(sub=>({
-    id:String(sub.id||""),title:String(sub.title||""),status:String(sub.status||""),deadline:String(sub.deadline||""),comment:String(sub.comment||""),
+    id:String(sub.id||""),title:String(sub.title||""),status:String(sub.status||""),nextUpdateDeadline:String(sub.nextUpdateDeadline||""),deadline:String(sub.deadline||""),comment:String(sub.comment||""),
     commentHistory:(Array.isArray(sub.commentHistory)?sub.commentHistory:[]).map(entry=>({changedAt:String(entry.changedAt||""),from:String(entry.from||""),to:String(entry.to||"")})),
     dateHistory:(Array.isArray(sub.dateHistory)?sub.dateHistory:[]).map(entry=>({changedAt:String(entry.changedAt||""),field:String(entry.field||""),from:String(entry.from||""),to:String(entry.to||""),comment:String(entry.comment||"")})),
     manualHistory:(Array.isArray(sub.manualHistory)?sub.manualHistory:[]).map(entry=>({occurredAt:String(entry.occurredAt||entry.addedAt||""),addedAt:String(entry.addedAt||""),note:String(entry.note||"")}))
