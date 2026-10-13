@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>CortexGrip — 5-Year Target Org Chart</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root{
+  --ink:#161B29;
+  --muted:#5B6478;
+  --bg:#F3F5FA;
+  --panel:#FFFFFF;
+  --border:#DEE3EE;
+  --border-soft:#EAEDF5;
+
+  --home:#147C4C;
+  --overseas:#2457C9;
+  --strategic:#6D3FC9;
+  --strategic-bg:#F3EEFC;
+  --strategic-border:#E1D3F9;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.editor-only{display:none}.editing .editor-only{display:flex}.editing .wrap{padding-bottom:110px}.save-state{font-size:11px;font-weight:700;color:var(--muted)}
+.public-note{display:flex;justify-content:center;margin:-22px 0 24px;color:var(--muted);font-size:11px}.editing .public-note{display:none}
+
+.wrap{max-width:1760px;margin:0 auto;padding:36px 24px 56px;overflow-x:auto}
+
+.title{text-align:center;margin-bottom:14px}
+.title h1{font-size:24px;font-weight:800;margin:0;letter-spacing:-.01em}
+
+.legend{display:flex;justify-content:center;flex-wrap:wrap;gap:22px;margin:0 0 36px;font-size:11.5px;font-weight:600;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.dot.dash{background:none;border:1.5px dashed var(--muted);width:7px;height:7px}
+
+.director{width:200px;background:linear-gradient(160deg,#242D49,#161B29);border-radius:14px;padding:16px;text-align:center;box-shadow:0 14px 28px rgba(20,27,45,.22)}
+.director .name{color:#fff;font-size:15.5px;font-weight:800}
+
+.connector{width:2px;height:22px;background:var(--border)}
+
+.chart{
+  min-width:1580px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr .84fr 1.7fr;
+  gap:24px 18px;
+  align-items:start;
+}
+
+.director-row{grid-column:1/6;grid-row:1;display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:4px}
+
+.slot{grid-row:2;position:relative;padding-bottom:18px;display:flex;align-items:flex-end}
+.slot-row{width:100%}
+.slot:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--border)}
+.slot-a:after{right:-18px}
+.slot-b:after{left:-18px;right:-18px}
+.slot-c:after{left:-18px}
+.slot-a,.slot-b,.slot-c{min-height:112px}
+.slot-a{grid-column:1/4}
+.slot-b{grid-column:4}
+.slot-c{grid-column:5}
+.slot-row{display:grid;gap:10px}
+.slot-a .slot-row{grid-template-columns:1fr 1fr;max-width:460px;margin:0 auto}
+.slot-b .slot-row{max-width:230px;margin:0 auto}
+.slot-c .slot-row{grid-template-columns:1fr 1fr}
+
+.dept{grid-row:3;position:relative;background:var(--panel);border:1px solid var(--border-soft);border-radius:16px;padding:14px;box-shadow:0 8px 20px rgba(20,27,45,.05)}
+.dept:before{content:"";position:absolute;top:-24px;left:50%;width:2px;height:24px;background:var(--border);transform:translateX(-1px)}
+.col-eng{grid-column:1/3}
+.col-web{display:none}
+.col-ops{grid-column:3}
+.col-itsec{grid-column:4}
+.col-dmbd{grid-column:5}
+
+.dept-label{font-size:12.5px;font-weight:700;text-align:center;padding-bottom:9px;margin-bottom:12px;border-bottom:2px solid var(--border-soft)}
+
+.card{background:var(--panel);border:1px solid var(--border-soft);border-radius:8px;padding:8px 9px;text-align:center;min-height:42px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.card .name{font-weight:700;font-size:11.5px;line-height:1.3}
+.card .role{font-size:9.5px;color:var(--muted);line-height:1.3}
+
+.card.home{border-left:3.5px solid var(--home)}
+.card.overseas{border-left:3.5px solid var(--overseas)}
+.card.strategic{background:var(--strategic-bg);border:1px solid var(--strategic-border);border-left:3.5px solid var(--strategic);border-radius:10px}
+.card.strategic .name{color:#3E1F80}
+.card.strategic .role{color:#6B4A9C}
+
+.card.lead{border-radius:10px;box-shadow:0 5px 14px rgba(20,27,45,.08);border-width:1.5px}
+.card.bulk{background:#FAFBFD}
+.card.future{border-style:dashed}
+.card.future .role{font-style:italic}
+
+.count{align-self:center;margin-top:2px;padding:2px 9px;border-radius:999px;background:#EEF1FF;color:#3A4FD6;font-size:9.5px;font-weight:800}
+
+.branch{margin-top:10px;padding-top:10px;border-top:1px solid var(--border-soft)}
+.children2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.children3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stack-gap{margin-top:8px}
+
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.dual-col{padding:0 12px}
+.dual-col:first-child{padding-left:0;border-right:1px solid var(--border-soft)}
+.dual-col:last-child{padding-right:0}
+
+.collab{text-align:center;font-size:9.5px;color:var(--strategic);font-weight:700;margin:9px 0}
+
+[contenteditable]{cursor:text;border-radius:4px}
+[contenteditable]:hover{outline:1.5px dashed var(--overseas);outline-offset:2px}
+[contenteditable]:focus{outline:1.5px solid var(--overseas);outline-offset:2px;background:#fff}
+
+.card{position:relative}
+.card-del{position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;border:none;background:#D8425C;color:#fff;font-size:12px;line-height:18px;padding:0;text-align:center;cursor:pointer;display:none;box-shadow:0 2px 6px rgba(20,27,45,.25);z-index:2}
+.card:hover .card-del{display:block}
+.card.dragging{opacity:.35}
+.card[draggable="true"]{cursor:grab}
+
+.zone-add{display:block;width:100%;margin-top:8px;padding:6px;border:1.5px dashed var(--border);background:transparent;border-radius:8px;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit}
+.zone-add:hover{border-color:var(--overseas);color:var(--overseas)}
+
+.toolbar{position:fixed;top:16px;right:16px;z-index:50;display:flex;align-items:center;gap:10px}
+.toolbar button{background:var(--ink);color:#fff;border:none;border-radius:9px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(20,27,45,.28);font-family:inherit}
+.toolbar button:hover{opacity:.88}
+.hint{font-size:10.5px;line-height:1.5;color:var(--muted);background:#fff;border:1px solid var(--border-soft);padding:9px 12px;border-radius:10px;max-width:200px;box-shadow:0 8px 18px rgba(20,27,45,.08)}
+
+.panel-bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;border-top:1px solid var(--border-soft);box-shadow:0 -10px 24px rgba(20,27,45,.10);padding:10px 18px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.panel-bar-title{font-weight:800;font-size:11.5px;margin-right:2px;white-space:nowrap}
+.panel-bar select,.panel-bar input[type="text"]{padding:7px 9px;border:1px solid var(--border);border-radius:7px;font-size:11px;font-family:inherit;color:var(--ink);background:#fff}
+.panel-bar #zoneSelect{min-width:180px}
+.panel-bar #fieldName{width:110px}
+.panel-bar #fieldRole{width:150px}
+.panel-bar #fieldCount{width:80px}
+.panel-bar #fieldType{width:100px}
+.panel-bar label.checkbox{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.panel-bar label.checkbox input[type="checkbox"]{width:auto;margin:0}
+#addBoxBtn{background:var(--overseas);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap}
+#addBoxBtn:hover{opacity:.9}
+
+.group-bg{border-radius:20px;background:#EBEEF6;border:1px solid var(--border-soft);grid-row:3;z-index:0}
+.group-bg-ewo{grid-column:1/4;margin:-2px -14px -14px}
+.group-bg-itsec{grid-column:4;margin:-2px -12px -14px}
+.group-bg-dmbd{grid-column:5;margin:-2px -12px -14px}
+.dept{z-index:1}
+
+
+.shared-ewo{grid-column:1/4;grid-row:3;position:relative;background:var(--panel);border:1px solid var(--border-soft);border-radius:18px;padding:14px;box-shadow:0 8px 20px rgba(20,27,45,.05);z-index:1}
+.shared-ewo:before{content:"";position:absolute;top:-24px;left:50%;width:2px;height:24px;background:var(--border);transform:translateX(-1px)}
+.shared-label{font-size:12.5px;font-weight:700;text-align:center;padding-bottom:9px;margin-bottom:12px;border-bottom:2px solid var(--border-soft)}
+.shared-leads{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px;align-items:stretch}
+.shared-lead-cell{display:flex;align-items:stretch}
+.shared-lead-cell .card{width:100%;min-height:54px}
+.shared-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.shared-sub{background:#FAFBFD;border:1px solid var(--border-soft);border-radius:14px;padding:12px;min-width:0}
+.shared-sub .dept-label{margin-bottom:10px;font-size:13px}
+.shared-sub .children2{grid-template-columns:1fr 1fr}
+
+@media (max-width:1050px){
+  .panel-bar{position:static;flex-direction:column;align-items:stretch;box-shadow:none;border-top:none;border:1px solid var(--border-soft);border-radius:12px;margin-bottom:18px}
+  .panel-bar select,.panel-bar input[type="text"]{width:100%}
+  .toolbar{position:static;justify-content:center;margin-bottom:18px;flex-wrap:wrap}
+  .chart{min-width:0;grid-template-columns:1fr}
+  .slot-a,.slot-b,.slot-c,.col-eng,.col-web,.col-ops,.col-itsec,.col-dmbd{grid-column:1;grid-row:auto}
+  .dept:before{display:none}
+  .group-bg{display:none}
+  .shared-ewo{grid-column:1;grid-row:auto}
+  .shared-ewo:before{display:none}
+  .shared-leads,.shared-cols{grid-template-columns:1fr}
+  .dual{grid-template-columns:1fr}
+  .dual-col:first-child{border-right:none;border-bottom:1px solid var(--border-soft);padding:0 0 12px}
+  .dual-col:last-child{padding:12px 0 0}
+}
+</style>
+</head>
+<body>
+<div class="toolbar editor-only">
+  <div class="hint">Click any name, role, heading, or count to edit it. Drag cards to rearrange them.</div>
+  <span id="saveState" class="save-state">Loading…</span>
+  <button id="saveChart" type="button">Save org chart</button>
+  <button id="openPublic" type="button">Open public view</button>
+</div>
+<div class="wrap">
+
+  
+
+  
+
+  <div class="title"><h1>CortexGrip — 5-Year Target Organisation</h1></div>
+  <div class="public-note">Read-only public organisation chart</div>
+
+  <div class="legend">
+    <span><i class="dot" style="background:var(--home)"></i>Home</span>
+    <span><i class="dot" style="background:var(--overseas)"></i>Overseas</span>
+    <span><i class="dot" style="background:var(--strategic)"></i>Strategic oversight</span>
+    <span><i class="dot dash"></i>Planned role</span>
+  </div>
+
+  <div class="chart">
+
+    <div class="director-row">
+      <div class="director"><div class="name">Director</div></div>
+      <div class="connector"></div>
+    </div>
+
+    <div class="slot slot-a">
+      <div class="slot-row" data-zone-id="strategic-a">
+        <div class="card strategic"><div class="name">Engineering Architecture Specialist</div><div class="role">Engineering • Web Development • Operations &amp; Support</div></div>
+        <div class="card strategic"><div class="name">Product Strategy Specialist</div><div class="role">Engineering • Web Development • Operations &amp; Support</div></div>
+      </div>
+    </div>
+
+    <div class="slot slot-b">
+      <div class="slot-row" data-zone-id="strategic-b">
+        <div class="card strategic"><div class="name">Cybersecurity &amp; Infrastructure Strategy Specialist</div><div class="role">IT, DevOps &amp; Security</div></div>
+      </div>
+    </div>
+
+    <div class="slot slot-c">
+      <div class="slot-row" data-zone-id="strategic-c">
+        <div class="card strategic"><div class="name">Commercial Strategy Specialist</div><div class="role">Business Development</div></div>
+        <div class="card strategic"><div class="name">Sales&nbsp; &amp; Marketing Specialist</div><div class="role">Marketing</div></div>
+      </div>
+    </div>
+
+    <section class="shared-ewo">
+      <div class="shared-label">Software Engineering &amp; Operations</div>
+
+      <div class="shared-leads">
+        <div class="shared-lead-cell">
+          <div class="card home lead" data-zone-id="eng-lead"><div class="name">Software Engineering Project Lead</div></div>
+        </div>
+        <div class="shared-lead-cell">
+          <div class="card home lead" data-zone-id="ops-lead"><div class="name">Showmita Saha</div><div class="role">Ops, Support &amp; QA Lead</div></div>
+        </div>
+      </div>
+
+      <div class="shared-cols">
+        <div class="shared-sub">
+          <div class="dept-label">Engineering</div>
+          <div class="card home"><div class="name">Ayan</div><div class="role">Software Project Manager</div></div>
+          <div class="children2 stack-gap" data-zone-id="eng-team">
+            <div class="card overseas"><div class="name">Rintu</div><div class="role">PHP Developer</div></div>
+            <div class="card overseas"><div class="name">Turza</div><div class="role">PHP Developer</div></div>
+            <div class="card overseas"><div class="name">Abu Baker</div><div class="role">PHP Developer</div></div>
+            <div class="card overseas"><div class="name">Imran</div><div class="role">PHP Developer</div></div>
+            <div class="card overseas future"><div class="name">Developer 5</div><div class="role">Developer</div></div>
+            <div class="card overseas future"><div class="name">Developer 6</div><div class="role">Developer</div></div>
+            <div class="card overseas future"><div class="name">Developer 7</div><div class="role">Developer</div></div>
+            <div class="card overseas future"><div class="name">Developer 8</div><div class="role">Developer</div></div>
+          </div>
+        </div>
+
+        <div class="shared-sub">
+          <div class="dept-label">Web Development</div>
+          <div class="children2" data-zone-id="web-dev-team">
+            <div class="card overseas"><div class="name">Riaz</div><div class="role">Web Developer</div></div>
+            <div class="card overseas"><div class="name">Kazi</div><div class="role">Web Developer</div></div>
+            <div class="card overseas"><div class="name">Miskat</div><div class="role">Web Developer</div></div>
+            <div class="card overseas"><div class="name">Hasibul</div><div class="role">Web Developer</div></div>
+          </div>
+          <div class="children2 stack-gap" data-zone-id="web-team">
+            <div class="card overseas"><div class="name">Nazmul</div><div class="role">UI/UX Designer</div></div>
+            <div class="card overseas future"><div class="name">UI/UX Designer 2</div><div class="role">UI/UX Designer</div></div>
+          </div>
+        </div>
+
+        <div class="shared-sub">
+          <div class="dept-label">Operations &amp; Support</div>
+          <div data-zone-id="ops-mgmt">
+            <div class="card home"><div class="name">Project Delivery Analyst</div><div class="role">Project Delivery Analyst</div></div>
+            <div class="children2 stack-gap" data-zone-id="ops-team">
+              <div class="card overseas"><div class="name">QA 1</div></div>
+              <div class="card overseas"><div class="name">QA 2</div></div>
+              <div class="card overseas"><div class="name">QA 3</div></div>
+              <div class="card overseas"><div class="name">QA 4</div></div>
+              <div class="card overseas bulk" style="grid-column:1/-1"><div class="name">Support Team</div><div class="role">24/7</div><div class="count">40</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="group-bg group-bg-itsec"></div>
+
+    <section class="dept col-itsec" data-zone-id="itsec-lead">
+      <div class="dept-label">IT, DevOps &amp; Security</div>
+      <div class="card home lead"><div class="name">Infrastructure Lead</div></div>
+      <div class="branch">
+        <div class="children2" data-zone-id="itsec-team">
+          <div class="card overseas"><div class="name">Saeydul Amin</div><div class="role">Cloud Engineer</div></div>
+          <div class="card overseas"><div class="name">Alibul Rafi</div><div class="role">IT Infrastructure Support</div></div>
+          <div class="card overseas future"><div class="name">DevOps Engineer</div><div class="role">Future role</div></div>
+          <div class="card overseas future"><div class="name">Security Engineer</div><div class="role">Future role</div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="group-bg group-bg-dmbd"></div>
+
+    <section class="dept col-dmbd">
+      <div class="dept-label">Digital, Marketing &amp; BD</div>
+      <div class="dual">
+        <div class="dual-col" data-zone-id="bd-lead">
+          <div class="card home lead"><div class="name">BD Manager</div></div>
+          <div class="branch">
+            <div class="children2" data-zone-id="bd-team">
+              <div class="card overseas"><div class="name">Sales / BD Executive 1</div></div>
+              <div class="card overseas"><div class="name">Sales / BD Executive 2</div></div>
+              <div class="card overseas"><div class="name">Sales / BD Executive 3</div></div>
+              <div class="card overseas"><div class="name">Sales / BD Executive 4</div></div>
+              <div class="card overseas"><div class="name">Sales / BD Executive 5</div></div>
+              <div class="card overseas"><div class="name">Sales / BD Executive 6</div></div>
+              <div class="card overseas"><div class="name">Sales / BD Executive 7</div></div>
+              <div class="card overseas"><div class="name">Sales / BD Executive 8</div></div>
+              <div class="card overseas"><div class="name">Account Manager 1</div></div>
+              <div class="card overseas"><div class="name">Account Manager 2</div></div>
+              <div class="card overseas"><div class="name">Account Manager 3</div></div>
+              <div class="card overseas"><div class="name">Account Manager 4</div></div>
+              <div class="card overseas"><div class="name">Account Manager 5</div></div>
+              <div class="card overseas"><div class="name">Account Manager 6</div></div>
+              <div class="card overseas"><div class="name">Account Manager 7</div></div>
+              <div class="card overseas"><div class="name">Account Manager 8</div></div>
+              <div class="card overseas"><div class="name">Account Manager 9</div></div>
+              <div class="card overseas"><div class="name">Account Manager 10</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="dual-col" data-zone-id="mkt-lead">
+          <div class="card home lead"><div class="name">Creative &amp; Experience Team Manager</div></div>
+          <div class="branch">
+            <div class="children3" data-zone-id="mkt-core">
+              <div class="card home"><div class="name">Owasit</div><div class="role">Digital Marketing</div></div>
+              <div class="card home"><div class="name">Harshil</div><div class="role">Digital Marketing</div></div>
+              <div class="card overseas"><div class="name">Digital Marketing 3</div></div>
+            </div>
+            <div class="collab">↔ collaborates with BD</div>
+            <div class="children2" data-zone-id="mkt-support">
+              <div class="card overseas"><div class="name">Content Creator 1</div></div>
+              <div class="card overseas"><div class="name">Content Creator 2</div></div>
+              <div class="card overseas"><div class="name">Content Creator 3</div></div>
+              <div class="card overseas"><div class="name">Content Creator 4</div></div>
+              <div class="card overseas"><div class="name">Video Editor 1</div></div>
+              <div class="card overseas"><div class="name">Video Editor 2</div></div>
+              <div class="card overseas"><div class="name">Video Editor 3</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="panel-bar editor-only">
+  <span class="panel-bar-title">Add role</span>
+  <select id="zoneSelect" aria-label="Chart section"></select>
+  <input id="fieldName" type="text" placeholder="Name / position">
+  <input id="fieldRole" type="text" placeholder="Role detail">
+  <select id="fieldType"><option value="home">Home</option><option value="overseas">Overseas</option><option value="strategic">Strategic</option></select>
+  <label class="checkbox"><input id="fieldFuture" type="checkbox"> Planned role</label>
+  <button id="addBoxBtn" type="button">Add role</button>
+</div>
+<script>
+(function(){
+"use strict";
+const editing=new URLSearchParams(location.search).get("edit")==="1";
+const chart=document.querySelector(".chart"),state=document.getElementById("saveState");
+let version=0,key="",dragged=null;
+const zoneNames={"strategic-a":"Strategic — Engineering & Operations","strategic-b":"Strategic — IT & Security","strategic-c":"Strategic — Commercial","eng-lead":"Engineering lead","eng-team":"Engineering team","web-dev-team":"Web developers","web-team":"Web design","ops-lead":"Operations lead","ops-mgmt":"Operations management","ops-team":"Operations team","itsec-lead":"IT / DevOps lead","itsec-team":"IT / DevOps team","bd-lead":"Business development lead","bd-team":"Business development team","mkt-lead":"Marketing lead","mkt-core":"Marketing core","mkt-support":"Marketing support"};
+function safeHtml(html){const template=document.createElement("template");template.innerHTML=String(html||"");template.content.querySelectorAll("script,iframe,object,embed,link,meta,style").forEach(x=>x.remove());template.content.querySelectorAll("*").forEach(el=>[...el.attributes].forEach(a=>{if(/^on/i.test(a.name)||/^(javascript|data):/i.test(a.value))el.removeAttribute(a.name)}));return template.innerHTML}
+function setChart(html){if(html)chart.innerHTML=safeHtml(html);if(editing)enableEditor()}
+async function load(){
+  if(editing){document.body.classList.add("editing");key=sessionStorage.getItem("cortexGripTrackerKey")||"";if(!key)key=prompt("Enter your private CortexGrip tracker key")||"";if(!key){state.textContent="Tracker key required";return}sessionStorage.setItem("cortexGripTrackerKey",key);const response=await fetch("/api/org-chart",{headers:{Authorization:"Bearer "+key,Accept:"application/json"},cache:"no-store"});const payload=await response.json();if(!response.ok)throw new Error(payload.error||"Unable to load chart");version=payload.version||0;if(payload.html)setChart(payload.html);else enableEditor();state.textContent="Ready to edit";
+  }else{const response=await fetch("/api/public-org-chart",{cache:"no-store"});if(response.ok){const payload=await response.json();if(payload.html)setChart(payload.html)}}
+}
+function makeEditable(){chart.querySelectorAll(".name,.role,.count,.dept-label,.shared-label").forEach(el=>el.setAttribute("contenteditable","true"))}
+function addDeleteButtons(){chart.querySelectorAll(".card").forEach(card=>{card.setAttribute("draggable","true");if(!card.querySelector(":scope > .card-del")){const button=document.createElement("button");button.className="card-del";button.type="button";button.textContent="×";button.title="Delete role";button.onclick=()=>{if(confirm("Delete this role from the chart?"))card.remove()};card.append(button)}})}
+function enableEditor(){makeEditable();addDeleteButtons();const select=document.getElementById("zoneSelect");select.innerHTML="";chart.querySelectorAll("[data-zone-id]").forEach(zone=>{const option=document.createElement("option");option.value=zone.dataset.zoneId;option.textContent=zoneNames[option.value]||option.value;select.append(option)})}
+function cleanClone(){const clone=chart.cloneNode(true);clone.querySelectorAll(".card-del").forEach(x=>x.remove());clone.querySelectorAll("[contenteditable],[draggable]").forEach(x=>{x.removeAttribute("contenteditable");x.removeAttribute("draggable")});clone.querySelectorAll(".dragging").forEach(x=>x.classList.remove("dragging"));return clone.innerHTML}
+async function save(){if(!key)return;state.textContent="Saving…";const response=await fetch("/api/org-chart",{method:"PUT",headers:{Authorization:"Bearer "+key,"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({version,html:cleanClone()})});const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||"Save failed");version=payload.version;state.textContent="Saved and published"}
+chart.addEventListener("dragstart",event=>{if(!editing)return;const card=event.target.closest(".card");if(!card)return;dragged=card;card.classList.add("dragging")});
+chart.addEventListener("dragend",()=>{if(dragged)dragged.classList.remove("dragging");dragged=null});
+chart.addEventListener("dragover",event=>{if(editing&&dragged&&event.target.closest("[data-zone-id]"))event.preventDefault()});
+chart.addEventListener("drop",event=>{if(!editing||!dragged)return;const zone=event.target.closest("[data-zone-id]");if(!zone)return;event.preventDefault();const target=event.target.closest(".card");target&&target!==dragged?zone.insertBefore(dragged,target):zone.append(dragged)});
+document.getElementById("addBoxBtn").onclick=()=>{const zone=chart.querySelector('[data-zone-id="'+CSS.escape(document.getElementById("zoneSelect").value)+'"]');if(!zone)return;const card=document.createElement("div"),type=document.getElementById("fieldType").value;card.className="card "+type+(document.getElementById("fieldFuture").checked?" future":"");const name=document.getElementById("fieldName").value.trim()||"New role",role=document.getElementById("fieldRole").value.trim();card.innerHTML='<div class="name"></div>'+(role?'<div class="role"></div>':'');card.querySelector(".name").textContent=name;if(role)card.querySelector(".role").textContent=role;zone.append(card);enableEditor();document.getElementById("fieldName").value="";document.getElementById("fieldRole").value=""};
+document.getElementById("saveChart").onclick=()=>save().catch(error=>state.textContent=error.message);
+document.getElementById("openPublic").onclick=()=>window.open("/org-chart.html","_blank","noopener");
+load().catch(error=>{if(state)state.textContent=error.message});
+})();
+</script>
+</body></html>
