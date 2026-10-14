@@ -260,6 +260,52 @@ body{background:#fff;font-family:Arial,Helvetica,sans-serif}
   .chart{min-width:0}
   .shared-leads:after,.shared-lead-cell:after,.shared-cols:before,.shared-sub:before,.dual:before,.dual-col:before,.branch:before,.slot-row>.card:after{display:none}
 }
+
+/* CortexGrip brand treatment */
+:root{
+  --ink:#1C1917;
+  --muted:#79706B;
+  --bg:#F9F8F7;
+  --panel:#FFFFFF;
+  --border:#F24E29;
+  --border-soft:#E8E3DF;
+  --home:#F24E29;
+  --overseas:#FF6A45;
+  --strategic:#1C1917;
+  --strategic-bg:#F3F0EE;
+  --strategic-border:#F24E29;
+}
+body,.wrap{background:#F9F8F7}
+.title{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:22px}
+.title-logo{width:54px;height:54px;flex:0 0 54px;filter:drop-shadow(0 5px 10px rgba(28,25,23,.14))}
+.title h1{font-family:Arial,Helvetica,sans-serif;font-weight:800;color:#1C1917;letter-spacing:-.025em}
+.legend{color:#5C5550}
+.director{background:#1C1917;border-color:#1C1917}
+.director .name{color:#FF6A45}
+.dept,.shared-ewo{background:#FFFFFF;border-color:#F24E29}
+.shared-sub{background:#FFF9F6;border-color:#FF9A82}
+.dept-label,.shared-label{background:#F24E29;border-color:#D94320;color:#FFFFFF}
+.shared-sub .dept-label{background:#1C1917;border-color:#1C1917;color:#FFFFFF}
+.card{background:#FFF4EF;border-color:#FF8A70}
+.card.lead{background:#FFE0D7;border-color:#F24E29}
+.card.home{border-left-color:#F24E29}
+.card.overseas{border-color:#FF6A45}
+.card.strategic{background:#F3F0EE;border-color:#F24E29}
+.card.strategic .name{color:#1C1917}
+.card.strategic .role{color:#6B625D}
+.card.status-filled{background:#E7F4EC;border:2px solid #15803D;color:#125F30}
+.card.status-filled .name,.card.status-filled .role{color:#125F30}
+.card.status-vacant{background:#FCE9E6;border:2px dashed #C2261B;color:#8D1C14}
+.card.status-vacant .name,.card.status-vacant .role{color:#8D1C14}
+.card.status-temporary{background:#FFF2D8;border:2px solid #B45309;color:#7C3907}
+.card.status-temporary .name,.card.status-temporary .role{color:#7C3907}
+.count{border-color:#FFB19E;color:#9F341B}
+.toolbar button,#addBoxBtn{background:#F24E29;color:#FFFFFF;border-color:#F24E29}
+.toolbar button:hover,#addBoxBtn:hover{background:#D94320;opacity:1}
+.hint,.panel-bar{border-color:#E8E3DF}
+[contenteditable]:hover{outline-color:#F24E29}
+[contenteditable]:focus{outline-color:#F24E29}
+@media(max-width:1050px){.title-logo{width:44px;height:44px;flex-basis:44px}}
 </style>
 </head>
 <body>
@@ -275,7 +321,7 @@ body{background:#fff;font-family:Arial,Helvetica,sans-serif}
 
   
 
-  <div class="title"><h1>CortexGrip — 5-Year Target Organisation</h1></div>
+  <div class="title"><img class="title-logo" src="/favicon.svg" alt="CortexGrip logo"><h1>CortexGrip — 5-Year Target Organisation</h1></div>
 
   <div class="legend">
     <span><i class="dot" style="background:#E3F2ED!important;border-color:#2E8B6E"></i>Role filled</span>
