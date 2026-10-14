@@ -330,8 +330,8 @@ body,.wrap{background:#F9F8F7}
 /* Professional connector system */
 :root{--connector:#625B56}
 .chart{position:relative}
-.chart:before{content:"";position:absolute;left:50%;top:82px;width:2px;height:196px;background:var(--connector);transform:translateX(-1px);z-index:0}
-.director-row .connector{display:none}
+.chart:before{display:none}
+.director-row .connector{display:block;width:2px;height:30px;background:var(--connector)}
 .slot:after{height:2px;background:var(--connector)}
 .slot-row>.card:after{width:2px;background:var(--connector);transform:translateX(-1px)}
 .dept:before,.shared-ewo:before{width:2px;background:var(--connector);transform:translateX(-1px)}
@@ -341,7 +341,6 @@ body,.wrap{background:#F9F8F7}
 .shared-sub:before{width:2px;background:var(--connector);transform:translateX(-1px)}
 .branch{border-top:2px solid var(--connector)}
 .branch:before,.dual-col>.card:first-child:before{width:2px;background:var(--connector);transform:translateX(-1px)}
-@media(max-width:1050px){.chart:before{display:none}}
 </style>
 </head>
 <body>
