@@ -173,6 +173,68 @@ body{
   .dual-col:first-child{border-right:none;border-bottom:1px solid var(--border-soft);padding:0 0 12px}
   .dual-col:last-child{padding:12px 0 0}
 }
+
+/* Property Scanner-inspired organisation-chart presentation */
+:root{
+  --ink:#1A1A1A;
+  --muted:#6B5A3A;
+  --bg:#FFFFFF;
+  --panel:#FDEFC9;
+  --border:#E8A93A;
+  --border-soft:#D9B96F;
+  --home:#D98E2B;
+  --overseas:#2E8B6E;
+  --strategic:#3D4E68;
+  --strategic-bg:#EDEFF3;
+  --strategic-border:#3D4E68;
+}
+body{background:#fff;font-family:Arial,Helvetica,sans-serif}
+.wrap{max-width:none;min-width:1700px;padding:28px 54px 72px;background:#fff}
+.title{margin-bottom:20px}
+.title h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;font-weight:400;letter-spacing:0;color:#1A1A1A}
+.legend{gap:30px;margin:0 0 42px;font-size:14px;color:#3D3D3A}
+.dot{width:20px;height:14px;border-radius:4px;border:2px solid #E8A93A;background:#FDEFC9!important}
+.dot[style*="overseas"]{background:#E3F2ED!important;border-color:#2E8B6E}
+.dot[style*="strategic"]{background:#EDEFF3!important;border-color:#3D4E68}
+.dot.dash{width:20px;height:14px;border:2px dashed #C0392B;background:#fff!important}
+.chart{min-width:1580px;gap:28px 20px}
+.director{width:280px;min-height:82px;padding:18px;background:#1A1A1A;border:3px solid #1A1A1A;border-radius:14px;box-shadow:none}
+.director .name{font-size:22px;color:#FDEFC9;line-height:1.3}
+.connector,.slot:after,.dept:before,.shared-ewo:before{background:#4A4A4A}
+.connector{height:30px;width:3px}
+.slot{padding-bottom:24px}.slot:after{height:3px}
+.slot-a,.slot-b,.slot-c{min-height:126px}
+.group-bg{display:none}
+.dept,.shared-ewo{background:rgba(253,239,201,.22);border:2px dashed #C98A2E;border-radius:16px;padding:16px;box-shadow:none}
+.dept-label,.shared-label{font-size:17px;font-weight:700;color:#1A1A1A;background:#F6D27A;border:3px solid #D98E2B;border-radius:12px;padding:13px 10px;margin-bottom:16px}
+.shared-label{font-size:20px}
+.shared-sub{background:rgba(253,239,201,.32);border:2px dashed #C98A2E;border-radius:14px;padding:13px}
+.shared-sub .dept-label{font-size:15px;padding:10px 8px;border-width:2px}
+.card{min-height:54px;padding:10px 12px;background:#FDEFC9;border:2px solid #E8A93A;border-left-width:2px;border-radius:12px;box-shadow:none}
+.card .name{font-size:14px;line-height:1.35;color:#1A1A1A}
+.card .role{font-size:11.5px;line-height:1.35;color:#6B5A3A}
+.card.lead{min-height:64px;background:#F6D27A;border:3px solid #D98E2B;border-radius:13px;box-shadow:none}
+.card.lead .name{font-size:16px}
+.card.home{border-left:2px solid #E8A93A}
+.card.overseas{background:#E3F2ED;border:2px solid #2E8B6E;color:#1F5C47}
+.card.overseas .name,.card.overseas .role{color:#1F5C47}
+.card.strategic{background:#EDEFF3;border:2px dashed #3D4E68;border-left-width:2px;border-radius:12px}
+.card.strategic .name,.card.strategic .role{color:#3D4E68}
+.card.future{background:#FFF9EA;border:2px dashed #C0392B;color:#C0392B}
+.card.future .name,.card.future .role{color:#C0392B}
+.card.bulk{background:#FFF8E7}
+.count{background:#fff;border:1px solid #D2BF94;color:#6B5A3A;font-size:10px}
+.branch{border-top:2px solid #D9B96F}
+.collab{color:#8A5A1E;font-size:11px}
+.toolbar button{background:#1A1A1A;color:#FDEFC9;border:2px solid #1A1A1A;box-shadow:none}
+.hint{border:1px solid #D2BF94;color:#6B5A3A;box-shadow:none}
+.panel-bar{border-top:2px solid #D2BF94;box-shadow:0 -8px 20px rgba(26,26,26,.08)}
+#addBoxBtn{background:#D98E2B}
+@media(max-width:1050px){
+  .wrap{min-width:0;padding:24px 16px 48px}
+  .title h1{font-size:30px}
+  .chart{min-width:0}
+}
 </style>
 </head>
 <body>
