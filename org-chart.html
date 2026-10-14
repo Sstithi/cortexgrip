@@ -341,6 +341,18 @@ body,.wrap{background:#F9F8F7}
 .shared-sub:before{width:2px;background:var(--connector);transform:translateX(-1px)}
 .branch{border-top:2px solid var(--connector)}
 .branch:before,.dual-col>.card:first-child:before{width:2px;background:var(--connector);transform:translateX(-1px)}
+
+/* Content-sized desktop canvas with horizontal scrolling */
+.wrap{max-width:100%;min-width:0;overflow-x:auto;overflow-y:visible}
+.chart{width:max-content;min-width:2300px;grid-template-columns:minmax(440px,max-content) minmax(440px,max-content) minmax(360px,max-content) minmax(340px,max-content) minmax(780px,max-content)}
+.card .name,.card .role,.dept-label,.shared-label{white-space:nowrap}
+.card{min-width:max-content}
+@media(max-width:1050px){
+  .wrap{overflow-x:visible}
+  .chart{width:auto;min-width:0;grid-template-columns:1fr}
+  .card{min-width:0}
+  .card .name,.card .role,.dept-label,.shared-label{white-space:normal}
+}
 </style>
 </head>
 <body>
