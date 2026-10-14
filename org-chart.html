@@ -347,6 +347,12 @@ body,.wrap{background:#F9F8F7}
 .chart{width:max-content;min-width:2300px;grid-template-columns:minmax(440px,max-content) minmax(440px,max-content) minmax(360px,max-content) minmax(340px,max-content) minmax(780px,max-content)}
 .card .name,.card .role,.dept-label,.shared-label{white-space:nowrap}
 .card{min-width:max-content}
+.shared-cols.engineering-groups{grid-template-columns:2fr 1fr 1fr}
+.shared-cols.engineering-groups:before{left:25%;right:12.5%}
+.card.status-filled{background:#FFFFFF;border:2px solid #15803D;border-left-width:6px;color:#1C1917}
+.card.status-vacant{background:#FFFFFF;border:2px dashed #C2261B;border-left-width:6px;color:#1C1917}
+.card.status-temporary{background:#FFFFFF;border:2px solid #B88700;border-left-width:6px;color:#1C1917}
+.card.status-filled .name,.card.status-filled .role,.card.status-vacant .name,.card.status-vacant .role,.card.status-temporary .name,.card.status-temporary .role{color:#1C1917}
 @media(max-width:1050px){
   .wrap{overflow-x:visible}
   .chart{width:auto;min-width:0;grid-template-columns:1fr}
@@ -371,9 +377,9 @@ body,.wrap{background:#F9F8F7}
   <div class="title"><img class="title-logo" src="/cortexgrip-dark-logo.png" alt="CortexGrip logo"><h1>CortexGrip — 5-Year Target Organisation</h1></div>
 
   <div class="legend">
-    <span><i class="dot" style="background:#E3F2ED!important;border-color:#2E8B6E"></i>Role filled</span>
-    <span><i class="dot dash" style="background:#FDE8E7!important;border-color:#C0392B"></i>Role vacant</span>
-    <span><i class="dot" style="background:#FFF3BF!important;border-color:#D49B00"></i>Temporary role</span>
+    <span><i class="dot" style="background:#fff!important;border-color:#2E8B6E"></i>Role filled</span>
+    <span><i class="dot dash" style="background:#fff!important;border-color:#C0392B"></i>Role vacant</span>
+    <span><i class="dot" style="background:#fff!important;border-color:#D49B00"></i>Temporary role</span>
   </div>
 
   <div class="chart">
@@ -547,14 +553,15 @@ body,.wrap{background:#F9F8F7}
 const editing=new URLSearchParams(location.search).get("edit")==="1";
 const chart=document.querySelector(".chart"),state=document.getElementById("saveState");
 let version=0,key="",dragged=null;
-const zoneNames={"strategic-a":"Strategic — Engineering & Operations","strategic-b":"Strategic — IT & Security","strategic-c":"Strategic — Commercial","eng-lead":"Engineering lead","eng-team":"Engineering team","web-dev-team":"Web developers","web-team":"Web design","ops-lead":"Operations lead","ops-mgmt":"Operations management","ops-team":"Operations team","itsec-lead":"IT / DevOps lead","itsec-team":"IT / DevOps team","bd-lead":"Business development lead","bd-team":"Business development team","mkt-lead":"Marketing lead","mkt-core":"Marketing core","mkt-support":"Marketing support"};
+const zoneNames={"strategic-a":"Strategic — Engineering & Operations","strategic-b":"Strategic — IT & Security","strategic-c":"Strategic — Commercial","eng-lead":"Engineering lead","eng-team":"Engineering team","web-dev-team":"Web developers","web-team":"Web design","ops-lead":"Operations lead","ops-mgmt":"QA management","ops-team":"QA team","support-team":"Support team","itsec-lead":"IT / DevOps lead","itsec-team":"IT / DevOps team","bd-lead":"Business development lead","bd-team":"Business development team","mkt-lead":"Marketing lead","mkt-core":"Marketing core","mkt-support":"Marketing support"};
 function safeHtml(html){const template=document.createElement("template");template.innerHTML=String(html||"");template.content.querySelectorAll("script,iframe,object,embed,link,meta,style").forEach(x=>x.remove());template.content.querySelectorAll("*").forEach(el=>[...el.attributes].forEach(a=>{if(/^on/i.test(a.name)||/^(javascript|data):/i.test(a.value))el.removeAttribute(a.name)}));return template.innerHTML}
 function normalizeStatuses(){chart.querySelectorAll(".card").forEach(card=>{if(!card.matches(".status-filled,.status-vacant,.status-temporary"))setStatus(card,card.classList.contains("future")?"vacant":"filled")})}
 function normalizeTeams(){const columns=chart.querySelector(".shared-cols");if(!columns)return;const sections=[...columns.querySelectorAll(":scope > .shared-sub")],engineering=sections.find(section=>/^(engineering|engineering team)$/i.test(section.querySelector(":scope > .dept-label")?.textContent.trim()||"")),web=sections.find(section=>/^web development$/i.test(section.querySelector(":scope > .dept-label")?.textContent.trim()||""));if(!engineering)return;engineering.querySelector(":scope > .dept-label").textContent="Engineering Team";if(web){[...web.children].filter(child=>!child.classList.contains("dept-label")).forEach(child=>{child.classList.add("stack-gap");engineering.append(child)});web.remove()}if(columns.querySelectorAll(":scope > .shared-sub").length===2)columns.classList.add("merged-teams")}
-function setChart(html){if(html){chart.innerHTML=safeHtml(html);const savedTitle=chart.querySelector("template[data-org-title]");if(savedTitle){document.querySelector(".title h1").textContent=savedTitle.content.textContent.trim()||"CortexGrip — 5-Year Target Organisation";savedTitle.remove()}}normalizeTeams();normalizeStatuses();if(editing)enableEditor()}
+function normalizeQualitySupport(){const columns=chart.querySelector(".shared-cols");if(!columns)return;const heading=chart.querySelector(".shared-label");if(heading)heading.textContent="Engineering";let sections=[...columns.querySelectorAll(":scope > .shared-sub")],qa=sections.find(section=>/^(operations\s*&\s*support|qa)$/i.test(section.querySelector(":scope > .dept-label")?.textContent.trim()||"")),support=sections.find(section=>/^support$/i.test(section.querySelector(":scope > .dept-label")?.textContent.trim()||""));if(!qa)return;qa.querySelector(":scope > .dept-label").textContent="QA";if(!support){support=document.createElement("div");support.className="shared-sub";support.innerHTML='<div class="dept-label">Support</div><div class="children2" data-zone-id="support-team"></div>';const supportZone=support.querySelector('[data-zone-id="support-team"]'),supportCards=[...qa.querySelectorAll(".card")].filter(card=>/support/i.test(card.querySelector(".name")?.textContent||""));supportCards.forEach(card=>supportZone.append(card));columns.append(support)}columns.classList.remove("merged-teams");columns.classList.add("engineering-groups")}
+function setChart(html){if(html){chart.innerHTML=safeHtml(html);const savedTitle=chart.querySelector("template[data-org-title]");if(savedTitle){document.querySelector(".title h1").textContent=savedTitle.content.textContent.trim()||"CortexGrip — 5-Year Target Organisation";savedTitle.remove()}}normalizeTeams();normalizeQualitySupport();normalizeStatuses();if(editing)enableEditor()}
 async function load(){
-  if(editing){document.body.classList.add("editing");key=sessionStorage.getItem("cortexGripTrackerKey")||"";if(!key)key=prompt("Enter your private CortexGrip tracker key")||"";if(!key){state.textContent="Tracker key required";return}sessionStorage.setItem("cortexGripTrackerKey",key);const response=await fetch("/api/org-chart",{headers:{Authorization:"Bearer "+key,Accept:"application/json"},cache:"no-store"});const payload=await response.json();if(!response.ok)throw new Error(payload.error||"Unable to load chart");version=payload.version||0;if(payload.html)setChart(payload.html);else{normalizeTeams();normalizeStatuses();enableEditor()}state.textContent="Ready to edit";
-  }else{normalizeTeams();normalizeStatuses();const response=await fetch("/api/public-org-chart",{cache:"no-store"});if(response.ok){const payload=await response.json();if(payload.html)setChart(payload.html)}}
+  if(editing){document.body.classList.add("editing");key=sessionStorage.getItem("cortexGripTrackerKey")||"";if(!key)key=prompt("Enter your private CortexGrip tracker key")||"";if(!key){state.textContent="Tracker key required";return}sessionStorage.setItem("cortexGripTrackerKey",key);const response=await fetch("/api/org-chart",{headers:{Authorization:"Bearer "+key,Accept:"application/json"},cache:"no-store"});const payload=await response.json();if(!response.ok)throw new Error(payload.error||"Unable to load chart");version=payload.version||0;if(payload.html)setChart(payload.html);else{normalizeTeams();normalizeQualitySupport();normalizeStatuses();enableEditor()}state.textContent="Ready to edit";
+  }else{normalizeTeams();normalizeQualitySupport();normalizeStatuses();const response=await fetch("/api/public-org-chart",{cache:"no-store"});if(response.ok){const payload=await response.json();if(payload.html)setChart(payload.html)}}
 }
 function makeEditable(){chart.querySelectorAll(".name,.role,.count,.dept-label,.shared-label").forEach(el=>el.setAttribute("contenteditable","true"));document.querySelector(".title h1").setAttribute("contenteditable","true")}
 function setStatus(card,status){card.classList.remove("future","status-filled","status-vacant","status-temporary");card.classList.add("status-"+status)}
