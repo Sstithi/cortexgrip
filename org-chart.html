@@ -202,7 +202,7 @@ body{background:#fff;font-family:Arial,Helvetica,sans-serif}
 .director .name{font-size:22px;color:#FDEFC9;line-height:1.3}
 .connector,.slot:after,.dept:before,.shared-ewo:before{background:#4A4A4A}
 .connector{height:30px;width:3px}
-.slot{padding-bottom:24px}.slot:after{height:3px}
+.slot{padding-bottom:24px;z-index:2}.slot:after{height:3px;background:#333;z-index:3}
 .slot-a,.slot-b,.slot-c{min-height:126px}
 .group-bg{display:none}
 .dept,.shared-ewo{background:rgba(253,239,201,.22);border:2px dashed #C98A2E;border-radius:16px;padding:16px;box-shadow:none}
@@ -216,6 +216,7 @@ body{background:#fff;font-family:Arial,Helvetica,sans-serif}
 .card.lead{min-height:64px;background:#F6D27A;border:3px solid #D98E2B;border-radius:13px;box-shadow:none}
 .card.lead .name{font-size:16px}
 .card.home{border-left:2px solid #E8A93A}
+.card.home .name::after{content:" 🇬🇧";font-size:.9em;white-space:nowrap}
 .card.overseas{background:#E3F2ED;border:2px solid #2E8B6E;color:#1F5C47}
 .card.overseas .name,.card.overseas .role{color:#1F5C47}
 .card.strategic{background:#EDEFF3;border:2px dashed #3D4E68;border-left-width:2px;border-radius:12px}
@@ -230,10 +231,28 @@ body{background:#fff;font-family:Arial,Helvetica,sans-serif}
 .hint{border:1px solid #D2BF94;color:#6B5A3A;box-shadow:none}
 .panel-bar{border-top:2px solid #D2BF94;box-shadow:0 -8px 20px rgba(26,26,26,.08)}
 #addBoxBtn{background:#D98E2B}
+.director-row,.dept,.shared-ewo,.shared-cols,.shared-sub,.dual,.branch{position:relative}
+.dept:before,.shared-ewo:before{top:-28px;height:28px;width:3px;background:#333;z-index:5}
+.shared-leads{position:relative;margin-bottom:0;padding-bottom:30px}
+.shared-leads:after{content:"";position:absolute;left:25%;right:25%;bottom:14px;height:3px;background:#333}
+.shared-lead-cell{position:relative}
+.shared-lead-cell:after{content:"";position:absolute;left:50%;bottom:14px;width:3px;height:16px;background:#333;transform:translateX(-1px)}
+.shared-cols{padding-top:20px}
+.shared-cols:before{content:"";position:absolute;left:16.666%;right:16.666%;top:0;height:3px;background:#333}
+.shared-sub:before{content:"";position:absolute;left:50%;top:-20px;width:3px;height:20px;background:#333;transform:translateX(-1px)}
+.dual{padding-top:18px}
+.dual:before{content:"";position:absolute;left:25%;right:25%;top:0;height:3px;background:#333}
+.dual-col{position:relative}
+.dual-col:before{content:"";position:absolute;left:50%;top:-18px;width:3px;height:18px;background:#333;transform:translateX(-1px)}
+.branch{margin-top:20px;padding-top:20px;border-top:3px solid #333}
+.branch:before{content:"";position:absolute;left:50%;top:-20px;width:3px;height:20px;background:#333;transform:translateX(-1px)}
+.slot-row>.card{position:relative}
+.slot-row>.card:after{content:"";position:absolute;left:50%;bottom:-25px;width:3px;height:25px;background:#333;transform:translateX(-1px);z-index:-1}
 @media(max-width:1050px){
   .wrap{min-width:0;padding:24px 16px 48px}
   .title h1{font-size:30px}
   .chart{min-width:0}
+  .shared-leads:after,.shared-lead-cell:after,.shared-cols:before,.shared-sub:before,.dual:before,.dual-col:before,.branch:before,.slot-row>.card:after{display:none}
 }
 </style>
 </head>
