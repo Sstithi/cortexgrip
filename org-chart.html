@@ -317,7 +317,12 @@ body,.wrap{background:#F9F8F7}
 .shared-cols:before{top:0}
 .shared-sub:before{top:-24px;height:24px}
 .dual:before{display:none}
-.dual-col:before{top:-18px;height:18px}
+.shared-lead-cell:after,.dual-col:before{display:none}
+.shared-lead-cell>.card:after{content:"";position:absolute;left:50%;top:100%;width:3px;height:24px;background:#333;transform:translateX(-1px);z-index:1}
+.dual-col>.card:first-child:before{content:"";position:absolute;left:50%;bottom:100%;width:3px;height:18px;background:#333;transform:translateX(-1px);z-index:1}
+.director{background:#FFFFFF;border:3px solid #F24E29;box-shadow:0 8px 18px rgba(28,25,23,.10)}
+.director .name{color:#1C1917}
+@media(max-width:1050px){.shared-lead-cell>.card:after,.dual-col>.card:first-child:before{display:none}}
 </style>
 </head>
 <body>
