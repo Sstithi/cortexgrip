@@ -353,6 +353,8 @@ body,.wrap{background:#F9F8F7}
 .card.status-vacant{background:#FFFFFF;border:2px dashed #C2261B;color:#1C1917}
 .card.status-temporary{background:#FFFFFF;border:2px solid #B88700;color:#1C1917}
 .card.status-filled .name,.card.status-filled .role,.card.status-vacant .name,.card.status-vacant .role,.card.status-temporary .name,.card.status-temporary .role{color:#1C1917}
+.dept,.shared-ewo{background:#FFF9F6;border:none}
+.shared-sub{background:#FFF3EE;border:none}
 .chart{min-width:2000px;grid-template-columns:360px 360px 300px 320px minmax(680px,720px)}
 .children2>.card,.children3>.card{min-width:0}
 .children2>.card .name,.children2>.card .role,.children3>.card .name,.children3>.card .role{white-space:normal}
@@ -431,7 +433,7 @@ body,.wrap{background:#F9F8F7}
 
       <div class="shared-cols">
         <div class="shared-sub">
-          <div class="dept-label">Engineering</div>
+          <div class="dept-label">Engineering Team</div>
           <div class="card home"><div class="name">Ayan</div><div class="role">Software Project Manager</div></div>
           <div class="children2 stack-gap" data-zone-id="eng-team">
             <div class="card overseas"><div class="name">Rintu</div><div class="role">PHP Developer</div></div>
@@ -443,11 +445,7 @@ body,.wrap{background:#F9F8F7}
             <div class="card overseas future"><div class="name">Developer 7</div><div class="role">Developer</div></div>
             <div class="card overseas future"><div class="name">Developer 8</div><div class="role">Developer</div></div>
           </div>
-        </div>
-
-        <div class="shared-sub">
-          <div class="dept-label">Web Development</div>
-          <div class="children2" data-zone-id="web-dev-team">
+          <div class="children2 stack-gap" data-zone-id="web-dev-team">
             <div class="card overseas"><div class="name">Riaz</div><div class="role">Web Developer</div></div>
             <div class="card overseas"><div class="name">Kazi</div><div class="role">Web Developer</div></div>
             <div class="card overseas"><div class="name">Miskat</div><div class="role">Web Developer</div></div>
@@ -460,7 +458,7 @@ body,.wrap{background:#F9F8F7}
         </div>
 
         <div class="shared-sub">
-          <div class="dept-label">Operations &amp; Support</div>
+          <div class="dept-label">Quality Team</div>
           <div data-zone-id="ops-mgmt">
             <div class="card home"><div class="name">Project Delivery Analyst</div><div class="role">Project Delivery Analyst</div></div>
             <div class="children2 stack-gap" data-zone-id="ops-team">
@@ -468,8 +466,14 @@ body,.wrap{background:#F9F8F7}
               <div class="card overseas"><div class="name">QA 2</div></div>
               <div class="card overseas"><div class="name">QA 3</div></div>
               <div class="card overseas"><div class="name">QA 4</div></div>
-              <div class="card overseas bulk" style="grid-column:1/-1"><div class="name">Support Team</div><div class="role">24/7</div><div class="count">40</div></div>
             </div>
+          </div>
+        </div>
+
+        <div class="shared-sub">
+          <div class="dept-label">Support Team</div>
+          <div class="children2" data-zone-id="support-team">
+            <div class="card overseas bulk" style="grid-column:1/-1"><div class="name">Support Team</div><div class="role">24/7</div><div class="count">40</div></div>
           </div>
         </div>
       </div>
