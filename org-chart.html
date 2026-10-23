@@ -356,6 +356,11 @@ body,.wrap{background:#F9F8F7}
 .dept,.shared-ewo{background:#FFF9F6;border:none}
 .shared-sub{background:#FFF3EE;border:none}
 .col-dmbd .dual-col>.card:first-child{min-height:84px}
+.col-dmbd .dual{padding-top:0}
+.director-row .director-ops{width:280px;min-height:64px}
+.shared-leads.single-lead{grid-template-columns:1fr;justify-items:center}
+.shared-leads.single-lead .shared-lead-cell{width:min(420px,100%)}
+.shared-leads.single-lead:after{left:25%;right:12.5%}
 .chart{min-width:2000px;grid-template-columns:360px 360px 300px 320px minmax(680px,720px)}
 .children2>.card,.children3>.card{min-width:0}
 .children2>.card .name,.children2>.card .role,.children3>.card .name,.children3>.card .role{white-space:normal}
@@ -398,6 +403,8 @@ body,.wrap{background:#F9F8F7}
     <div class="director-row">
       <div class="director"><div class="name">Director</div></div>
       <div class="connector"></div>
+      <div class="card home lead director-ops" data-zone-id="ops-lead"><div class="name">Showmita Saha</div><div class="role">Ops Lead</div></div>
+      <div class="connector"></div>
     </div>
 
     <div class="slot slot-a">
@@ -423,12 +430,9 @@ body,.wrap{background:#F9F8F7}
     <section class="shared-ewo">
       <div class="shared-label">Software Engineering &amp; Operations</div>
 
-      <div class="shared-leads">
+      <div class="shared-leads single-lead">
         <div class="shared-lead-cell">
           <div class="card home lead" data-zone-id="eng-lead"><div class="name">Software Engineering Project Lead</div></div>
-        </div>
-        <div class="shared-lead-cell">
-          <div class="card home lead" data-zone-id="ops-lead"><div class="name">Showmita Saha</div><div class="role">Ops, Support &amp; QA Lead</div></div>
         </div>
       </div>
 
@@ -474,7 +478,10 @@ body,.wrap{background:#F9F8F7}
         <div class="shared-sub">
           <div class="dept-label">Support Team</div>
           <div class="children2" data-zone-id="support-team">
-            <div class="card overseas bulk" style="grid-column:1/-1"><div class="name">Support Team</div><div class="role">24/7</div><div class="count">40</div></div>
+            <div class="card overseas"><div class="name">Support 1</div></div>
+            <div class="card overseas"><div class="name">Support 2</div></div>
+            <div class="card overseas"><div class="name">Support 3</div></div>
+            <div class="card overseas"><div class="name">Support 4</div></div>
           </div>
         </div>
       </div>
@@ -571,10 +578,11 @@ function safeHtml(html){const template=document.createElement("template");templa
 function normalizeStatuses(){chart.querySelectorAll(".card").forEach(card=>{if(!card.matches(".status-filled,.status-vacant,.status-temporary"))setStatus(card,card.classList.contains("future")?"vacant":"filled")})}
 function normalizeTeams(){const columns=chart.querySelector(".shared-cols");if(!columns)return;const sections=[...columns.querySelectorAll(":scope > .shared-sub")],engineering=sections.find(section=>/^(engineering|engineering team)$/i.test(section.querySelector(":scope > .dept-label")?.textContent.trim()||"")),web=sections.find(section=>/^web development$/i.test(section.querySelector(":scope > .dept-label")?.textContent.trim()||""));if(!engineering)return;engineering.querySelector(":scope > .dept-label").textContent="Engineering Team";if(web){[...web.children].filter(child=>!child.classList.contains("dept-label")).forEach(child=>{child.classList.add("stack-gap");engineering.append(child)});web.remove()}if(columns.querySelectorAll(":scope > .shared-sub").length===2)columns.classList.add("merged-teams")}
 function normalizeQualitySupport(){const columns=chart.querySelector(".shared-cols");if(!columns)return;const heading=chart.querySelector(".shared-label");if(heading)heading.textContent="Engineering";let sections=[...columns.querySelectorAll(":scope > .shared-sub")],qa=sections.find(section=>/^(operations\s*&\s*support|qa|quality team)$/i.test(section.querySelector(":scope > .dept-label")?.textContent.trim()||"")),support=sections.find(section=>/^(support|support team)$/i.test(section.querySelector(":scope > .dept-label")?.textContent.trim()||""));if(!qa)return;qa.querySelector(":scope > .dept-label").textContent="Quality Team";if(!support){support=document.createElement("div");support.className="shared-sub";support.innerHTML='<div class="dept-label">Support Team</div><div class="children2" data-zone-id="support-team"></div>';const supportZone=support.querySelector('[data-zone-id="support-team"]'),supportCards=[...qa.querySelectorAll(".card")].filter(card=>/support/i.test(card.querySelector(".name")?.textContent||""));supportCards.forEach(card=>supportZone.append(card));columns.append(support)}else support.querySelector(":scope > .dept-label").textContent="Support Team";columns.classList.remove("merged-teams");columns.classList.add("engineering-groups")}
-function setChart(html){if(html){chart.innerHTML=safeHtml(html);const savedTitle=chart.querySelector("template[data-org-title]");if(savedTitle){document.querySelector(".title h1").textContent=savedTitle.content.textContent.trim()||"CortexGrip — 5-Year Target Organisation";savedTitle.remove()}}normalizeTeams();normalizeQualitySupport();normalizeStatuses();if(editing)enableEditor()}
+function normalizeLeadHierarchy(){const directorRow=chart.querySelector(".director-row"),sharedLeads=chart.querySelector(".shared-leads");if(!directorRow||!sharedLeads)return;let showmita=[...chart.querySelectorAll(".card")].find(card=>/^showmita saha$/i.test(card.querySelector(".name")?.textContent.trim()||""));if(!showmita){showmita=document.createElement("div");showmita.className="card home lead";showmita.innerHTML='<div class="name">Showmita Saha</div><div class="role">Ops Lead</div>'}showmita.classList.add("director-ops");showmita.dataset.zoneId="ops-lead";let role=showmita.querySelector(".role");if(!role){role=document.createElement("div");role.className="role";showmita.append(role)}role.textContent="Ops Lead";directorRow.querySelectorAll(".director-ops,.connector.extra").forEach(node=>node.remove());const connector=document.createElement("div");connector.className="connector extra";directorRow.append(showmita,connector);sharedLeads.classList.add("single-lead");[...sharedLeads.querySelectorAll(".shared-lead-cell")].forEach(cell=>{if(!cell.querySelector('[data-zone-id="eng-lead"]'))cell.remove()});const supportZone=chart.querySelector('[data-zone-id="support-team"]');if(supportZone&&(supportZone.querySelector(".bulk")||supportZone.querySelectorAll(":scope > .card").length!==4)){supportZone.innerHTML="";for(let i=1;i<=4;i++){const card=document.createElement("div");card.className="card overseas";card.innerHTML='<div class="name">Support '+i+'</div>';supportZone.append(card)}}}
+function setChart(html){if(html){chart.innerHTML=safeHtml(html);const savedTitle=chart.querySelector("template[data-org-title]");if(savedTitle){document.querySelector(".title h1").textContent=savedTitle.content.textContent.trim()||"CortexGrip — 5-Year Target Organisation";savedTitle.remove()}}normalizeTeams();normalizeQualitySupport();normalizeLeadHierarchy();normalizeStatuses();if(editing)enableEditor()}
 async function load(){
-  if(editing){document.body.classList.add("editing");key=sessionStorage.getItem("cortexGripTrackerKey")||"";if(!key)key=prompt("Enter your private CortexGrip tracker key")||"";if(!key){state.textContent="Tracker key required";return}sessionStorage.setItem("cortexGripTrackerKey",key);const response=await fetch("/api/org-chart",{headers:{Authorization:"Bearer "+key,Accept:"application/json"},cache:"no-store"});const payload=await response.json();if(!response.ok)throw new Error(payload.error||"Unable to load chart");version=payload.version||0;if(payload.html)setChart(payload.html);else{normalizeTeams();normalizeQualitySupport();normalizeStatuses();enableEditor()}state.textContent="Ready to edit";
-  }else{normalizeTeams();normalizeQualitySupport();normalizeStatuses();const response=await fetch("/api/public-org-chart",{cache:"no-store"});if(response.ok){const payload=await response.json();if(payload.html)setChart(payload.html)}}
+  if(editing){document.body.classList.add("editing");key=sessionStorage.getItem("cortexGripTrackerKey")||"";if(!key)key=prompt("Enter your private CortexGrip tracker key")||"";if(!key){state.textContent="Tracker key required";return}sessionStorage.setItem("cortexGripTrackerKey",key);const response=await fetch("/api/org-chart",{headers:{Authorization:"Bearer "+key,Accept:"application/json"},cache:"no-store"});const payload=await response.json();if(!response.ok)throw new Error(payload.error||"Unable to load chart");version=payload.version||0;if(payload.html)setChart(payload.html);else{normalizeTeams();normalizeQualitySupport();normalizeLeadHierarchy();normalizeStatuses();enableEditor()}state.textContent="Ready to edit";
+  }else{normalizeTeams();normalizeQualitySupport();normalizeLeadHierarchy();normalizeStatuses();const response=await fetch("/api/public-org-chart",{cache:"no-store"});if(response.ok){const payload=await response.json();if(payload.html)setChart(payload.html)}}
 }
 function makeEditable(){chart.querySelectorAll(".name,.role,.count,.dept-label,.shared-label").forEach(el=>el.setAttribute("contenteditable","true"));document.querySelector(".title h1").setAttribute("contenteditable","true")}
 function setStatus(card,status){card.classList.remove("future","status-filled","status-vacant","status-temporary");card.classList.add("status-"+status)}
